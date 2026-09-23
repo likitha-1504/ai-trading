@@ -34,10 +34,12 @@ Status Key:
 ---
 
 ## Phase 01: Architecture Lock & Technical Design
-- [ ] Validate end-to-end architecture pipeline and boundary constraints
-- [ ] Define interface data contracts and event schemas
-- [ ] Deliver final architecture package and dependency-ordered plan
-- [!] User Approval Gate for Phase 01
+- [x] Validate end-to-end architecture pipeline and boundary constraints
+- [x] Define interface data contracts and event schemas (`backend/app/models/contracts.py`)
+- [x] Define latency measurement budgets and failure modes matrix
+- [x] Deliver final architecture package and dependency-ordered plan in `ARCHITECTURE.md`
+- [x] Record ADR-006 in `DECISIONS.md`
+- [!] User Approval Gate for Phase 01 Checkpoint
 
 ---
 

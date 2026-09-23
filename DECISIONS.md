@@ -50,3 +50,15 @@ This document tracks all critical architectural, design, and technical decisions
 - **Context**: Micro-trading on small capital (₹100 to ₹300) is highly vulnerable to friction (STT, exchange fees, SEBI charges, stamp duty, GST, and slippage). A nominally winning trade can easily result in a net loss.
 - **Decision**: Integrate a rigorous, configurable fee calculation engine directly into candidate scoring. No trade will be authorized unless the projected gross profit minus total friction satisfies a positive statistical expectancy threshold.
 - **Consequences**: Protects micro-capital from attrition due to transaction costs.
+
+---
+
+## ADR-006: Formalization of Pipeline Boundary Contracts and Latency Budgets
+- **Date**: 2026-09-23
+- **Status**: APPROVED (Lead Architect Lock)
+- **Context**: To ensure seamless handoffs and eliminate subtle type bugs across the 10-hop pipeline (`Market Data → Normalizer → Feature Engine → Strategies → Candidate Ranker → AI Queue → Trade Gate → Execution → Position Watcher → Journal`), explicit schema validation and latency budgets are required.
+- **Decision**: 
+  1. Implement strict Pydantic v2 schemas in `app.models.contracts` for every pipeline boundary.
+  2. Mandate that the Position Watcher operates within a `< 50ms` internal evaluation budget.
+  3. Decouple the AI Queue asynchronously so slow LLM inference (`1.5s - 4.0s`) never backpressures market tick processing or position monitoring.
+- **Consequences**: Compile-time and runtime type safety; guaranteed non-blocking execution for deterministic safety paths.
