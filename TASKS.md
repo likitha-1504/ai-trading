@@ -27,8 +27,9 @@ Status Key:
   - [x] `BROKER_ADAPTER_SPEC.md`
   - [x] `UI_UX_SPEC.md`
   - [x] `AI_ROLES.md`
-- [x] Scaffold initial repository directory structure (FastAPI / SQLite / React skeleton)
-- [ ] Produce Phase 00 Bootstrap Report and await user sign-off
+- [x] Produce Phase 00 Bootstrap Report and await user sign-off
+- [x] Python virtual environment `.venv` created, dependencies installed, and sanity tests passed
+- [x] Verified Codex CLI invocation in harmless read-only sandbox mode
 
 ---
 
