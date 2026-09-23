@@ -62,3 +62,17 @@ This document tracks all critical architectural, design, and technical decisions
   2. Mandate that the Position Watcher operates within a `< 50ms` internal evaluation budget.
   3. Decouple the AI Queue asynchronously so slow LLM inference (`1.5s - 4.0s`) never backpressures market tick processing or position monitoring.
 - **Consequences**: Compile-time and runtime type safety; guaranteed non-blocking execution for deterministic safety paths.
+
+---
+
+## ADR-007: Deterministic Point-in-Time Feature Engine Architecture
+- **Date**: 2026-09-23
+- **Status**: APPROVED
+- **Context**: Downstream momentum and early-move strategies (Phase 05) and the AI council (Phase 10-11) require multi-dimensional quantitative features (momentum, RVOL, volume/price acceleration, session VWAP, realized volatility, spread, liquidity, price structure, and regime classification) with strict point-in-time safety and guaranteed low latency.
+- **Decision**:
+  1. Aggregate ticks via `BarAggregator` with fixed epoch-aligned time buckets (e.g. 60s) to prevent timestamp drift and forward-looking data contamination.
+  2. Maintain bounded per-symbol ring buffers (`deque(maxlen=100)`) and cumulative session counters for exact session VWAP calculations.
+  3. Calculate all 12 quantitative features deterministically with `Decimal` precision and sample statistics, avoiding heavy numerical dependencies.
+  4. Enforce sub-millisecond internal latency per feature evaluation, well within the 15ms architecture latency budget.
+- **Consequences**: Provable zero look-ahead leakage, identical feature evaluation across live streaming and historical replay/backtesting, and deterministic reproducibility.
+

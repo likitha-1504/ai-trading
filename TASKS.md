@@ -59,15 +59,16 @@ Status Key:
 - [x] `SimulatedMarketDataAdapter` with deterministic tick generation and fault injection
 - [x] Unit and integration test suite (`backend/tests/test_market_data.py`) passing 100%
 - [x] Zero live orders and zero LLM calls verified in data layer
-- [!] Phase 03 Phase Gate Checkpoint
+- [x] Phase 03 Phase Gate Checkpoint (APPROVED)
 
 ---
 
 ## Phase 04: Feature Engine
-- [ ] Prepare Codex delegation spec for feature computation
-- [ ] Codex: Implement momentum, volume acceleration, VWAP, spread, liquidity
-- [ ] Antigravity: Verify lookahead safety and timestamp immutability
-- [!] Phase 04 Phase Gate Checkpoint
+- [x] Prepare feature computation specifications and schemas (`FeatureSnapshot`)
+- [x] Implement point-in-time `BarAggregator` and 12-feature deterministic `FeatureEngine`
+- [x] Verify lookahead safety, timestamp immutability, and sub-15ms budget
+- [x] Comprehensive test suite (`backend/tests/test_feature_engine.py`) passing 100%
+- [!] Phase 04 Phase Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 

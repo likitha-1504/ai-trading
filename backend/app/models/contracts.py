@@ -86,7 +86,8 @@ class FeatureSnapshot(BaseModel):
     bar_timeframe: str = "1m"
     vwap: Decimal
     current_price: Decimal
-    vwap_distance_pct: Decimal
+    vwap_distance_pct: Decimal = Decimal(0)
+    momentum_score: Decimal = Decimal(0)
     relative_volume_10: Decimal  # RVOL over 10-bar baseline
     volume_acceleration: Decimal
     price_acceleration: Decimal
@@ -94,6 +95,10 @@ class FeatureSnapshot(BaseModel):
     spread_pct: Decimal
     liquidity_score: Decimal
     market_index_direction: str  # BULLISH / BEARISH / NEUTRAL
+    sector_strength: Decimal = Decimal(0)
+    price_structure: str = (
+        "RANGE"  # HIGHER_HIGHS, LOWER_LOWS, COMPRESSION, BREAKOUT, RANGE
+    )
     regime: MarketRegime
 
 
