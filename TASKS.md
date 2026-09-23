@@ -39,15 +39,17 @@ Status Key:
 - [x] Define latency measurement budgets and failure modes matrix
 - [x] Deliver final architecture package and dependency-ordered plan in `ARCHITECTURE.md`
 - [x] Record ADR-006 in `DECISIONS.md`
-- [!] User Approval Gate for Phase 01 Checkpoint
+- [x] User Approval Gate for Phase 01 Checkpoint (APPROVED)
 
 ---
 
 ## Phase 02: UI/UX Design System
-- [ ] Detail UI specifications for 15 dedicated terminal screens
-- [ ] Define visual design tokens, status badges, and typography
-- [ ] Formalize visual distinction between deterministic facts and AI reasoning
-- [ ] Produce Codex implementation task list for UI
+- [x] Detail UI specifications for 15 dedicated terminal screens in `UI_UX_SPEC.md`
+- [x] Define visual design tokens, status badges (15 states), and typography
+- [x] Formalize visual distinction between deterministic facts and AI reasoning
+- [x] Create wireframe and design system artifact
+- [x] Produce Codex implementation task list for UI (Phase 15 handoff)
+- [!] User Approval Gate for Phase 02 Checkpoint
 
 ---
 
