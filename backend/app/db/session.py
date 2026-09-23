@@ -1,6 +1,7 @@
 """SQLite WAL database connection management scaffold."""
 
 import aiosqlite
+
 from app.core.config import settings
 
 

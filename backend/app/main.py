@@ -1,8 +1,9 @@
 """FastAPI application entrypoint scaffold."""
 
 from fastapi import FastAPI
-from app.core.config import settings
+
 from app.api.v1.router import api_router
+from app.core.config import settings
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
