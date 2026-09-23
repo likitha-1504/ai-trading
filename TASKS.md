@@ -1,0 +1,213 @@
+# Project Task Board
+
+Status Key:
+- `[ ]` Not Started
+- `[/]` In Progress
+- `[x]` Completed
+- `[!]` Blocked / Awaiting Approval
+
+---
+
+## Phase 00: Project Bootstrap & Control Plane
+- [x] Read and digest prompt pack PDF (`Phasewise_Prompts_AI_Micro_Trading_Agent.pdf`)
+- [x] Environment inspection (Python, Node, Git, Ollama, Qwen3, DeepSeek-R1, Codex CLI)
+- [x] Execute harmless read-only Codex CLI probe (`codex --version`)
+- [x] Create project control plane documents:
+  - [x] `ARCHITECTURE.md`
+  - [x] `PROJECT_SPEC.md`
+  - [x] `DEVELOPMENT_PLAN.md`
+  - [x] `TASKS.md`
+  - [x] `DECISIONS.md`
+  - [x] `CODING_RULES.md`
+  - [x] `TEST_PLAN.md`
+  - [x] `DATABASE_SCHEMA.md`
+  - [x] `API_CONTRACTS.md`
+  - [x] `TRADING_RULES.md`
+  - [x] `FAILURE_HANDLING.md`
+  - [x] `BROKER_ADAPTER_SPEC.md`
+  - [x] `UI_UX_SPEC.md`
+  - [x] `AI_ROLES.md`
+- [x] Scaffold initial repository directory structure (FastAPI / SQLite / React skeleton)
+- [ ] Produce Phase 00 Bootstrap Report and await user sign-off
+
+---
+
+## Phase 01: Architecture Lock & Technical Design
+- [ ] Validate end-to-end architecture pipeline and boundary constraints
+- [ ] Define interface data contracts and event schemas
+- [ ] Deliver final architecture package and dependency-ordered plan
+- [!] User Approval Gate for Phase 01
+
+---
+
+## Phase 02: UI/UX Design System
+- [ ] Detail UI specifications for 15 dedicated terminal screens
+- [ ] Define visual design tokens, status badges, and typography
+- [ ] Formalize visual distinction between deterministic facts and AI reasoning
+- [ ] Produce Codex implementation task list for UI
+
+---
+
+## Phase 03: Market Data & Normalization
+- [ ] Prepare Codex delegation spec for `MarketData` interface
+- [ ] Codex: Implement provider adapter, normalization, and stale data checks
+- [ ] Antigravity: Post-Codex diff review & unit test verification
+- [!] Phase 03 Phase Gate Checkpoint
+
+---
+
+## Phase 04: Feature Engine
+- [ ] Prepare Codex delegation spec for feature computation
+- [ ] Codex: Implement momentum, volume acceleration, VWAP, spread, liquidity
+- [ ] Antigravity: Verify lookahead safety and timestamp immutability
+- [!] Phase 04 Phase Gate Checkpoint
+
+---
+
+## Phase 05: BUY Engine: Momentum + Early-Move Detection
+- [ ] Prepare Codex delegation spec for candidate generation and ranking
+- [ ] Codex: Implement Momentum Continuation and Early-Move strategies
+- [ ] Antigravity: Verify explainable candidate scoring and cooldown logic
+- [!] Phase 05 Phase Gate Checkpoint
+
+---
+
+## Phase 06: SELL Engine + Independent Position Watcher
+- [ ] Prepare Codex delegation spec for independent Position Watcher
+- [ ] Codex: Implement hard stops, circuit breakers, and trailing logic
+- [ ] Antigravity: Verify zero LLM dependency on emergency exits
+- [!] Phase 06 Critical Safety Gate Checkpoint
+
+---
+
+## Phase 07: Capital, Risk & Cost Engine
+- [ ] Prepare Codex delegation spec for capital management & Indian cost model
+- [ ] Codex: Implement STT, GST, SEBI, exchange fee calculations and ₹100/₹300 limits
+- [ ] Antigravity: Verify net-edge profitability calculation
+- [!] Phase 07 Phase Gate Checkpoint
+
+---
+
+## Phase 08: Execution Engine + Broker Abstraction
+- [ ] Prepare Codex delegation spec for `BrokerAdapter` and `PaperAdapter`
+- [ ] Codex: Implement order lifecycle state machine and reconciliation
+- [ ] Antigravity: Verify broker abstraction purity and idempotency
+- [!] Phase 08 Phase Gate Checkpoint
+
+---
+
+## Phase 09: Backtesting + Paper Trading Loop
+- [ ] Prepare Codex delegation spec for event-driven backtesting
+- [ ] Codex: Implement simulator, slippage model, and performance metrics
+- [ ] Antigravity: Verify backtest/paper strategy interface symmetry
+- [!] Phase 09 Phase Gate Checkpoint
+
+---
+
+## Phase 10: Qwen3 Analyst Integration
+- [ ] Prepare Codex delegation spec for Qwen3 integration
+- [ ] Codex: Implement structured JSON schema, prompt templates, and timeout handlers
+- [ ] Antigravity: Verify AI output validation and fallback behavior
+- [!] Phase 10 Phase Gate Checkpoint
+
+---
+
+## Phase 11: DeepSeek-R1 Challenger Layer
+- [ ] Prepare Codex delegation spec for adversarial challenger
+- [ ] Codex: Implement critique prompts, stress testing, and structured schema
+- [ ] Antigravity: Verify deterministic gate retains final decision authority
+- [!] Phase 11 Phase Gate Checkpoint
+
+---
+
+## Phase 12: Deterministic Trade Gate + AI Council
+- [ ] Prepare Codex delegation spec for Trade Gate pipeline
+- [ ] Codex: Assemble Candidate -> AI Council -> Risk Gate -> TradePlan pipeline
+- [ ] Antigravity: Verify that AI models cannot directly trigger order submissions
+- [!] Phase 12 Phase Gate Checkpoint
+
+---
+
+## Phase 13: Database, Journal & Performance
+- [ ] Prepare Codex delegation spec for SQLite WAL schema and journaling
+- [ ] Codex: Implement persistence, audit trails, and restart recovery
+- [ ] Antigravity: Verify ACID compliance and decision reproducibility
+- [!] Phase 13 Phase Gate Checkpoint
+
+---
+
+## Phase 14: FastAPI Backend + API Contracts
+- [ ] Prepare Codex delegation spec for FastAPI endpoints
+- [ ] Codex: Implement query/read endpoints and guarded command APIs
+- [ ] Antigravity: Verify endpoint security and live-trading guardrails
+- [!] Phase 14 Phase Gate Checkpoint
+
+---
+
+## Phase 15: React Dashboard Implementation
+- [ ] Prepare Codex delegation spec for React + Tailwind terminal
+- [ ] Codex: Implement 15 screens, status badges, and real-time feeds
+- [ ] Antigravity: Verify UI separation of system facts from AI suggestions
+- [!] Phase 15 Phase Gate Checkpoint
+
+---
+
+## Phase 16: Integration, Failure Injection & QA
+- [ ] Antigravity QA Suite: Inject network drops, stale data, and LLM timeouts
+- [ ] Verify Position Watcher intervention during simulated model crashes
+- [!] Phase 16 Release Readiness Gate
+
+---
+
+## Phase 17: Performance & Latency Optimization
+- [ ] Profile execution bottlenecks across feature calculation and DB writes
+- [ ] Optimize measured hotspots without sacrificing safety checks
+- [!] Phase 17 Performance Gate Checkpoint
+
+---
+
+## Phase 18: Paper Trading Validation
+- [ ] Run full end-to-end system in paper mode over a fixed test window
+- [ ] Measure candidate quality, slippage, expectancy, and uptime
+- [!] Phase 18 Validation Report Checkpoint
+
+---
+
+## Phase 19: Controlled ₹100 Live Readiness Gate
+- [ ] Conduct API credential and broker connection audit
+- [ ] Verify kill-switch, capital caps, and emergency exit procedures
+- [!] Explicit Human Approval Gate (Mandatory)
+
+---
+
+## Phase 20: ₹100 Controlled Live Experiment
+- [ ] Execute live trading under strict ₹100 capital ceiling
+- [ ] Monitor net P/L after taxes/brokerage and model latencies
+- [!] Phase 20 Experiment Evaluation
+
+---
+
+## Phase 21: ₹300 Autonomous Mode
+- [ ] Elevate autonomous trading ceiling to ₹300 after validated performance
+- [ ] Require explicit human approval for any allocation above ₹300
+- [!] Phase 21 Sign-Off
+
+---
+
+## Phase 22: Learning & Continuous Improvement
+- [ ] Implement post-trade analytics and versioned strategy improvement loop
+- [ ] Enforce immutability of live strategy rules without prior paper validation
+- [!] Phase 22 Sign-Off
+
+---
+
+## Phase 23: Final Production Hardening
+- [ ] Draft operational documentation (`RUNBOOK.md`, `OPERATIONS.md`, etc.)
+- [ ] Verify automated backups and system recovery procedures
+- [!] Phase 23 Sign-Off
+
+---
+
+## Phase 24: Completion Gate
+- [ ] Full repository audit against control plane specifications
+- [ ] Final Project Commander sign-off report
