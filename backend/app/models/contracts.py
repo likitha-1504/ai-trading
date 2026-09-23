@@ -296,6 +296,11 @@ class WatcherExitTrigger(str, Enum):
     CATASTROPHIC_LIQUIDITY_LOSS = "CATASTROPHIC_LIQUIDITY_LOSS"
     DAILY_CIRCUIT_BREAKER = "DAILY_CIRCUIT_BREAKER"
     MANUAL_KILL_SWITCH = "MANUAL_KILL_SWITCH"
+    MOMENTUM_DETERIORATION = "MOMENTUM_DETERIORATION"
+    STRUCTURE_BREAK = "STRUCTURE_BREAK"
+    SPREAD_WIDENING = "SPREAD_WIDENING"
+    MARKET_REVERSAL = "MARKET_REVERSAL"
+    AI_THESIS_INVALIDATION = "AI_THESIS_INVALIDATION"
 
 
 class PositionSnapshot(BaseModel):
@@ -310,6 +315,8 @@ class PositionSnapshot(BaseModel):
     current_price: Decimal
     hard_stop_price: Decimal
     trailing_stop_price: Decimal | None = None
+    take_profit_price: Decimal | None = None
+    highest_price_seen: Decimal | None = None
     unrealized_pnl: Decimal
     status: PositionStatus
     opened_at: datetime

@@ -90,4 +90,27 @@ This document tracks all critical architectural, design, and technical decisions
   5. Strictly prohibit order placement in the strategy and ranker layer.
 - **Consequences**: Clean separation of screening from order gating, predictable signal generation, zero duplicate candidate flooding.
 
+---
+
+## ADR-009: Autonomous Priority-Ordered Position Watcher & Emergency SELL Engine
+- **Date**: 2026-09-23
+- **Status**: PENDING APPROVAL (Phase 06 Gate Checkpoint)
+- **Context**: Autonomous position holding on micro-capital (₹100 to ₹300) requires millisecond-level capital defense against market shocks, broker disconnects, liquidity flash crashes, and trend exhaustion without waiting on probabilistic or slow LLM responses.
+- **Decision**:
+  1. Implement `IndependentPositionWatcher` with zero dependency on Ollama/Qwen3/DeepSeek-R1 for emergency execution paths.
+  2. Enforce a strict 7-level evaluation priority hierarchy:
+     - Priority 1: Hard Stop-Loss (immediate market exit on breach)
+     - Priority 2: Stale Data Emergency (feed dropped/frozen > 15s)
+     - Priority 3: Catastrophic Liquidity Loss (spread >= 50 bps or liquidity score <= 15.0)
+     - Priority 4: Daily Circuit Breaker (aggregate realized + unrealized drawdown >= 3.0% of equity)
+     - Priority 5: Profit Targets & Monotonic Trailing Stop Ratchet (activation at 1.5R, trail at 1.0R behind peak)
+     - Priority 6: Time Protection & Auto Square-Off (15:15 IST hard cutoff, max holding duration 3600s)
+     - Priority 7: Technical Deterioration & Structure Breakdown (spread widening >= 25 bps, momentum collapse <= -0.50%, structure lower lows, market reversal)
+  3. Treat qualitative AI thesis invalidation strictly as an auxiliary non-emergency signal via `ingest_ai_invalidation()`.
+  4. Centralize all thresholds in typed `WatcherConfig` to eliminate magic numbers.
+  5. Provide defensive handling for broker rejected orders (reset to OPEN for retry), partial fills, restart reconciliation, and operator manual kill-switch.
+  6. Enforce a sub-50ms latency budget per evaluation cycle (measured < 0.2ms).
+- **Consequences**: Guaranteed capital safety independent of external network or AI model state; deterministic, auditable exit rationale recorded in `WatcherInterventionEvent`.
+
+
 

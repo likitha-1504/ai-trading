@@ -83,10 +83,10 @@ Status Key:
 ---
 
 ## Phase 06: SELL Engine + Independent Position Watcher
-- [ ] Prepare Codex delegation spec for independent Position Watcher
-- [ ] Codex: Implement hard stops, circuit breakers, and trailing logic
-- [ ] Antigravity: Verify zero LLM dependency on emergency exits
-- [!] Phase 06 Critical Safety Gate Checkpoint
+- [x] Prepare Codex delegation spec for independent Position Watcher
+- [x] Codex: Implement hard stops, circuit breakers, and trailing logic (`backend/app/watcher/position_watcher.py`)
+- [x] Antigravity: Verify zero LLM dependency on emergency exits (`backend/tests/test_position_watcher.py`)
+- [!] Phase 06 Critical Safety Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 
