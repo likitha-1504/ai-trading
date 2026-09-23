@@ -78,7 +78,7 @@ Status Key:
 - [x] Implement Strategy B: `EarlyMoveDetectionStrategy` with volatility compression, acceleration, and alignment
 - [x] Implement `CandidateRanker` with cooldown deduplication, deterministic ranking, and tie-breaking
 - [x] Comprehensive test suite (`backend/tests/test_strategies.py`) passing 100% with zero orders placed
-- [!] Phase 05 Phase Gate Checkpoint (Awaiting User Sign-off)
+- [x] Phase 05 Phase Gate Checkpoint (APPROVED)
 
 ---
 
@@ -86,15 +86,15 @@ Status Key:
 - [x] Prepare Codex delegation spec for independent Position Watcher
 - [x] Codex: Implement hard stops, circuit breakers, and trailing logic (`backend/app/watcher/position_watcher.py`)
 - [x] Antigravity: Verify zero LLM dependency on emergency exits (`backend/tests/test_position_watcher.py`)
-- [!] Phase 06 Critical Safety Gate Checkpoint (Awaiting User Sign-off)
+- [x] Phase 06 Critical Safety Gate Checkpoint (APPROVED)
 
 ---
 
 ## Phase 07: Capital, Risk & Cost Engine
-- [ ] Prepare Codex delegation spec for capital management & Indian cost model
-- [ ] Codex: Implement STT, GST, SEBI, exchange fee calculations and ₹100/₹300 limits
-- [ ] Antigravity: Verify net-edge profitability calculation
-- [!] Phase 07 Phase Gate Checkpoint
+- [x] Prepare Codex delegation spec for capital management & Indian cost model (`backend/app/capital/config.py`)
+- [x] Codex: Implement STT, GST, SEBI, exchange fee calculations and ₹100/₹300 limits (`backend/app/capital/cost_model.py`, `backend/app/capital/capital_manager.py`)
+- [x] Antigravity: Verify net-edge profitability calculation and risk gating (`backend/app/capital/risk_engine.py`, `backend/tests/test_capital_risk_cost.py`)
+- [!] Phase 07 Phase Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 

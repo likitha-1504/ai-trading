@@ -94,7 +94,7 @@ This document tracks all critical architectural, design, and technical decisions
 
 ## ADR-009: Autonomous Priority-Ordered Position Watcher & Emergency SELL Engine
 - **Date**: 2026-09-23
-- **Status**: PENDING APPROVAL (Phase 06 Gate Checkpoint)
+- **Status**: APPROVED (User Gate Sign-Off)
 - **Context**: Autonomous position holding on micro-capital (₹100 to ₹300) requires millisecond-level capital defense against market shocks, broker disconnects, liquidity flash crashes, and trend exhaustion without waiting on probabilistic or slow LLM responses.
 - **Decision**:
   1. Implement `IndependentPositionWatcher` with zero dependency on Ollama/Qwen3/DeepSeek-R1 for emergency execution paths.
@@ -111,6 +111,25 @@ This document tracks all critical architectural, design, and technical decisions
   5. Provide defensive handling for broker rejected orders (reset to OPEN for retry), partial fills, restart reconciliation, and operator manual kill-switch.
   6. Enforce a sub-50ms latency budget per evaluation cycle (measured < 0.2ms).
 - **Consequences**: Guaranteed capital safety independent of external network or AI model state; deterministic, auditable exit rationale recorded in `WatcherInterventionEvent`.
+
+---
+
+## ADR-010: Configurable Indian Equity Cost Engine, Capital Tracking, and Deterministic Risk Gating
+- **Date**: 2026-09-24
+- **Status**: PENDING APPROVAL (Phase 07 Gate Checkpoint)
+- **Context**: Micro-capital trading (₹100 to ₹300) in Indian equities is critically sensitive to transaction friction (brokerage, STT, exchange charges, SEBI turnover fees, stamp duty, GST, and bid-ask slippage). A system without exhaustive cost modeling and deterministic risk gating will suffer rapid capital attrition even with nominally winning trade signals.
+- **Decision**:
+  1. Implement `IndianMarketCostModel` in `backend/app/capital/cost_model.py` with 100% configurable statutory rates and zero hardcoded fees.
+  2. Implement `CapitalManager` in `backend/app/capital/capital_manager.py` maintaining real-time equity, cash reserves, buying power, deployed allocations, high-water mark, and daily drawdowns.
+  3. Implement `RiskEngine` in `backend/app/capital/risk_engine.py` enforcing:
+     - 1.5% max risk per trade relative to current equity.
+     - 3.0% max daily drawdown circuit breaker.
+     - Max 2 concurrent open positions and zero duplicate symbol exposure.
+     - Minimum economical trade size verification.
+     - Expected Net Edge hurdle verification: $(\text{Target Gain} \times P(\text{Win})) - (\text{Stop Loss} \times (1 - P(\text{Win}))) - \text{Total Friction} \ge \text{Hurdle Rate}$.
+     - Autonomy policy gating: trades $\le ₹300$ are categorized as `ApprovalMode.AUTONOMOUS`; trades or total allocations $> ₹300$ mandate `ApprovalMode.MANUAL_PENDING`.
+- **Consequences**: Provable mathematical edge required before any trade plan can be authorized; deterministic capital defense and strict human-in-the-loop controls above the autonomous threshold.
+
 
 
 

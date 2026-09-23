@@ -228,6 +228,38 @@ class TradePlan(BaseModel):
         return v
 
 
+class CapitalSnapshot(BaseModel):
+    """Snapshot of account capital, balances, buying power, and drawdowns."""
+
+    timestamp: datetime
+    total_capital: Decimal
+    available_capital: Decimal
+    deployed_capital: Decimal
+    buying_power: Decimal
+    realized_pnl: Decimal
+    unrealized_pnl: Decimal
+    daily_drawdown_amount: Decimal
+    daily_drawdown_pct: Decimal
+    high_water_mark: Decimal
+    currency: str = "INR"
+
+
+class RiskEvaluationResult(BaseModel):
+    """Result of deterministic risk, capital, and cost evaluation for a trade candidate."""
+
+    approved: bool
+    approval_mode: ApprovalMode
+    symbol: str
+    approved_quantity: int
+    allocated_capital: Decimal
+    max_loss_potential: Decimal
+    friction: FrictionBreakdown
+    expected_gross_edge: Decimal
+    expected_net_edge: Decimal
+    is_circuit_breaker_tripped: bool
+    rejection_reasons: list[str] = Field(default_factory=list)
+
+
 # =====================================================================
 # 6. Execution & Broker Adapter Contracts
 # =====================================================================
