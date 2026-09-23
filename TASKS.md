@@ -49,14 +49,16 @@ Status Key:
 - [x] Formalize visual distinction between deterministic facts and AI reasoning
 - [x] Create wireframe and design system artifact
 - [x] Produce Codex implementation task list for UI (Phase 15 handoff)
-- [!] User Approval Gate for Phase 02 Checkpoint
+- [x] User Approval Gate for Phase 02 Checkpoint (APPROVED)
 
 ---
 
 ## Phase 03: Market Data & Normalization
-- [ ] Prepare Codex delegation spec for `MarketData` interface
-- [ ] Codex: Implement provider adapter, normalization, and stale data checks
-- [ ] Antigravity: Post-Codex diff review & unit test verification
+- [x] Abstract `BaseMarketDataAdapter` with async streaming, subscription, and reconnect loop
+- [x] `MarketDataNormalizer` for monotonic timestamps, spread %, and stale data detection
+- [x] `SimulatedMarketDataAdapter` with deterministic tick generation and fault injection
+- [x] Unit and integration test suite (`backend/tests/test_market_data.py`) passing 100%
+- [x] Zero live orders and zero LLM calls verified in data layer
 - [!] Phase 03 Phase Gate Checkpoint
 
 ---
