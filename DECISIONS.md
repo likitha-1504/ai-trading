@@ -76,3 +76,18 @@ This document tracks all critical architectural, design, and technical decisions
   4. Enforce sub-millisecond internal latency per feature evaluation, well within the 15ms architecture latency budget.
 - **Consequences**: Provable zero look-ahead leakage, identical feature evaluation across live streaming and historical replay/backtesting, and deterministic reproducibility.
 
+---
+
+## ADR-008: Dual BUY Strategy Engine and Cooldown Deduplication Architecture
+- **Date**: 2026-09-23
+- **Status**: APPROVED
+- **Context**: Candidate generation requires evaluating independent trading setups (Momentum Continuation and Early-Move Detection) with explainable evidence, strict rejection of false positives/deteriorating trends, zero order placement authority, and duplicate prevention.
+- **Decision**:
+  1. Implement `BaseStrategy` interface with `MomentumContinuationStrategy` and `EarlyMoveDetectionStrategy`.
+  2. All thresholds (RVOL $\ge 1.80$, spread $\le 0.15\%$, compression volatility $\le 0.35\%$, etc.) are centralized in typed Pydantic models (`MomentumContinuationConfig`, `EarlyMoveDetectionConfig`, `CandidateRankerConfig`) to eliminate magic numbers.
+  3. `CandidateRanker` enforces a per-symbol cooldown (default 300s) to suppress duplicate spam, allowing upgrades only when a subsequent candidate scores significantly higher (+15.0 pts).
+  4. Candidates provide an explicit, human-readable `quantitative_evidence` dictionary explaining entry reasons and metrics.
+  5. Strictly prohibit order placement in the strategy and ranker layer.
+- **Consequences**: Clean separation of screening from order gating, predictable signal generation, zero duplicate candidate flooding.
+
+

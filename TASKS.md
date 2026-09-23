@@ -68,15 +68,17 @@ Status Key:
 - [x] Implement point-in-time `BarAggregator` and 12-feature deterministic `FeatureEngine`
 - [x] Verify lookahead safety, timestamp immutability, and sub-15ms budget
 - [x] Comprehensive test suite (`backend/tests/test_feature_engine.py`) passing 100%
-- [!] Phase 04 Phase Gate Checkpoint (Awaiting User Sign-off)
+- [x] Phase 04 Phase Gate Checkpoint (APPROVED)
 
 ---
 
 ## Phase 05: BUY Engine: Momentum + Early-Move Detection
-- [ ] Prepare Codex delegation spec for candidate generation and ranking
-- [ ] Codex: Implement Momentum Continuation and Early-Move strategies
-- [ ] Antigravity: Verify explainable candidate scoring and cooldown logic
-- [!] Phase 05 Phase Gate Checkpoint
+- [x] Create strategy configuration parameters without magic numbers (`strategies/config.py`)
+- [x] Implement Strategy A: `MomentumContinuationStrategy` with VWAP, RVOL >= 1.8, and deterioration rejection
+- [x] Implement Strategy B: `EarlyMoveDetectionStrategy` with volatility compression, acceleration, and alignment
+- [x] Implement `CandidateRanker` with cooldown deduplication, deterministic ranking, and tie-breaking
+- [x] Comprehensive test suite (`backend/tests/test_strategies.py`) passing 100% with zero orders placed
+- [!] Phase 05 Phase Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 
