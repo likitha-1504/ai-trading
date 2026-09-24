@@ -308,6 +308,64 @@ class OrderEvent(BaseModel):
     timestamp: datetime
 
 
+class BrokerPosition(BaseModel):
+    """Position record as reported directly by the broker."""
+
+    symbol: str
+    side: TradeSide
+    quantity: int
+    entry_price: Decimal
+    current_price: Decimal
+    unrealized_pnl: Decimal
+
+
+class AccountBalance(BaseModel):
+    """Broker account equity and margin state."""
+
+    currency: str = "INR"
+    cash_balance: Decimal
+    available_margin: Decimal
+    used_margin: Decimal
+    total_equity: Decimal
+
+
+class ReconciliationMismatch(BaseModel):
+    """Specific discrepancy detected between local state and broker state."""
+
+    symbol: str
+    local_quantity: int
+    broker_quantity: int
+    discrepancy_type: str
+    details: str
+
+
+class ReconciliationReport(BaseModel):
+    """Comprehensive portfolio reconciliation outcome report."""
+
+    timestamp: datetime
+    is_clean: bool
+    positions_checked: int
+    mismatches: list[ReconciliationMismatch] = Field(default_factory=list)
+
+
+class ExecutionMetricsSnapshot(BaseModel):
+    """Aggregated execution latency, fill rates, and performance metrics."""
+
+    total_orders_submitted: int
+    total_orders_acknowledged: int
+    total_orders_filled: int
+    total_orders_partially_filled: int
+    total_orders_cancelled: int
+    total_orders_rejected: int
+    total_quantity_ordered: int
+    total_quantity_filled: int
+    total_slippage_incurred: Decimal
+    avg_submission_latency_ms: float
+    avg_ack_latency_ms: float
+    avg_fill_latency_ms: float
+
+
+
 # =====================================================================
 # 7. Independent Position Watcher Contracts (Zero LLM Dependency)
 # =====================================================================

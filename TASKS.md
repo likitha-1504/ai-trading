@@ -99,10 +99,10 @@ Status Key:
 ---
 
 ## Phase 08: Execution Engine + Broker Abstraction
-- [ ] Prepare Codex delegation spec for `BrokerAdapter` and `PaperAdapter`
-- [ ] Codex: Implement order lifecycle state machine and reconciliation
-- [ ] Antigravity: Verify broker abstraction purity and idempotency
-- [!] Phase 08 Phase Gate Checkpoint
+- [x] Prepare Codex delegation spec for `BrokerAdapter` and `PaperAdapter` (`backend/app/adapters/broker_base.py`, `backend/app/adapters/paper_adapter.py`)
+- [x] Codex: Implement order lifecycle state machine and reconciliation (`backend/app/execution/state_machine.py`, `backend/app/execution/execution_engine.py`, `backend/app/execution/metrics.py`)
+- [x] Antigravity: Verify broker abstraction purity and idempotency (`backend/tests/test_execution_engine.py`)
+- [!] Phase 08 Phase Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 

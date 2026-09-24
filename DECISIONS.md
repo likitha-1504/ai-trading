@@ -130,6 +130,21 @@ This document tracks all critical architectural, design, and technical decisions
      - Autonomy policy gating: trades $\le ₹300$ are categorized as `ApprovalMode.AUTONOMOUS`; trades or total allocations $> ₹300$ mandate `ApprovalMode.MANUAL_PENDING`.
 - **Consequences**: Provable mathematical edge required before any trade plan can be authorized; deterministic capital defense and strict human-in-the-loop controls above the autonomous threshold.
 
+---
 
-
-
+## ADR-011: Broker Abstraction Layer, Order Lifecycle State Machine, and Portfolio Reconciliation
+- **Date**: 2026-09-24
+- **Status**: PENDING APPROVAL (Phase 08 Gate Checkpoint)
+- **Context**: Interfacing with broker execution endpoints requires total decoupling of trading and risk core from external broker SDKs, strict state machine progression, idempotency to prevent duplicate orders during network latency/retries, comprehensive execution telemetry, realistic paper simulation, and automatic reconciliation with recovery procedures upon disconnects. Live trading must remain strictly disabled.
+- **Decision**:
+  1. Define abstract `BrokerAdapter` interface in `backend/app/adapters/broker_base.py` enforcing standard methods: `connect`, `disconnect`, `get_account_balance`, `get_positions`, `get_orders`, `submit_order`, `cancel_order`, and `reconcile`, with async event callback dispatch.
+  2. Implement `PaperAdapter` in `backend/app/adapters/paper_adapter.py` providing realistic tick-based slippage, configurable latency, partial fill emulation, fault injection (broker offline, rejection symbols), and portfolio balance/margin tracking.
+  3. Implement `OrderStateMachine` in `backend/app/execution/state_machine.py` enforcing strict transitions (`CREATED -> SUBMITTED -> ACKNOWLEDGED -> PARTIALLY_FILLED -> FILLED / CANCELLED / REJECTED`) and immutable terminal states (`FILLED`, `CANCELLED`, `REJECTED`).
+  4. Implement `ExecutionEngine` in `backend/app/execution/execution_engine.py` orchestrating:
+     - 60-second client-order-id deduplication window rejecting duplicate submissions with `DuplicateOrderError`.
+     - Delta-fill and cumulative telemetry updates, ignoring redundant exact-duplicate events.
+     - Portfolio reconciliation comparing local active positions against broker snapshot and reporting `MISSING_IN_BROKER`, `MISSING_IN_LOCAL`, or `QUANTITY_MISMATCH`.
+     - Reconnect recovery procedure reconnecting adapter and triggering immediate state audit.
+     - Hard-coded `is_live = False` safety lock ensuring zero live market interaction in Phase 08.
+  5. Implement `ExecutionMetricsTracker` in `backend/app/execution/metrics.py` recording order lifecycle counts, cumulative filled quantities, realized slippage, and average submission/acknowledgement/fill latencies in milliseconds.
+- **Consequences**: Zero broker lock-in, mathematically sound idempotency, high-fidelity paper trading execution matching live constraints, auditable reconciliation and latency telemetry, and guaranteed lockout of real-money live execution.
