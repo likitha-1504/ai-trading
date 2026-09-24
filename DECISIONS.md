@@ -275,7 +275,7 @@ This document tracks all critical architectural, design, and technical decisions
 
 ## ADR-017: FastAPI Backend, Segregated API Contracts, Guarded TradePlan Approvals, and Live-Trading Protection
 - **Date**: 2026-09-24
-- **Status**: PENDING APPROVAL (Phase 14 Gate Checkpoint)
+- **Status**: APPROVED (Phase 14 Gate Sign-Off)
 - **Context**: Phase 14 of the AI Micro-Trading Agent requires a FastAPI backend exposing safe read/query APIs across all 13 system aspects, segregating read queries from mutation/execution endpoints, strictly forbidding arbitrary order submission (e.g., `POST /orders` is strictly forbidden and returns 405 Method Not Allowed), guarding TradePlan approval/rejection workflows, and protecting live trading under explicit human confirmation, approval tokens, and strict safety controls.
 - **Decision**:
   1. **Segregated API Contract Schemas (`backend/app/api/schemas.py`)**:
@@ -309,6 +309,52 @@ This document tracks all critical architectural, design, and technical decisions
   - 18 comprehensive API tests passing in `backend/tests/test_api_v1.py` covering all 13 read domains, 405 Method Not Allowed for arbitrary order creation, plan approvals, live mode security locks, and emergency kill-switch.
   - Complete project test suite passing (167/167 tests passing).
   - Static type checking (`mypy backend`) and linting (`ruff check backend`) passing with zero errors across all 99 source files.
+
+---
+
+## ADR-018: React Trading Terminal, 15 Distinct Screens, Deterministic Fact Banners, and Emergency Kill-Switch UI
+- **Date**: 2026-09-24
+- **Status**: PENDING APPROVAL (Phase 15 Gate Checkpoint)
+- **Context**: Phase 15 of the AI Micro-Trading Agent requires building a complete React + TypeScript + Tailwind trading terminal adhering strictly to `UI_UX_SPEC.md` and Phase 15 requirements from the prompt pack. The interface must provide all 15 specified screens, strictly distinguish deterministic system facts from probabilistic AI hypotheses, support 15 visual badge states, provide a prominent emergency kill-switch with double-confirmation safety, and connect to realistic mock/paper telemetry feeds.
+- **Decision**:
+  1. **Design Tokens & Dark-First Philosophy (`frontend/tailwind.config.js`, `frontend/src/index.css`)**:
+     - Implement deep slate palette (`#0B0E14` root, `#151A23` surface, `#1C2331` elevated, `#222938` subtle border).
+     - Configure tabular numerals (`font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'`) on monospace fonts (`JetBrains Mono`) to eliminate number flutter during price updates.
+  2. **Strict Visual Distinction of Truth vs Speculation (`frontend/src/components/ui/FactBanner.tsx`)**:
+     - `[SYSTEM FACT]`: Sky Blue badge (`#0284C7`), solid border (`#0369A1`), clean sans/mono typography, signifying verified mathematical/broker reality.
+     - `[QWEN3 ANALYSIS]` & `[DEEPSEEK-R1 CHALLENGE]`: Violet badges (`#8B5CF6`), dashed purple borders (`#6D28D9`), subtle violet tint, with mandatory italicized disclaimer: *"Probabilistic LLM speculation. Never guarantees trajectory."*
+     - `[FINAL DETERMINISTIC GATE]`: Emerald/crimson solid border reinforcing zero LLM order placement authority.
+  3. **15 Visual Badge States (`frontend/src/components/ui/Badge.tsx`)**:
+     - Implement all 15 states specified in `UI_UX_SPEC.md`: `BUY`, `SELL`, `HOLD`, `WATCH`, `RISK` (with pulse animation), `ERROR`, `CONNECTED`, `DISCONNECTED`, `AI THINKING`, `AI UNAVAILABLE`, `PENDING`, `PARTIAL FILL`, `FILLED`, `CANCELLED`, `REJECTED`.
+  4. **Complete 15-Screen Architecture (`frontend/src/screens/`)**:
+     - Screen 1: Command Center (Executive KPI overview, active trade risk progress bar, watcher heartbeat, live logs).
+     - Screen 2: Market Scanner (Universe selector, momentum/RVOL/VWAP grid, spread bps, feature inspect).
+     - Screen 3: Candidate Feed (Momentum & Early-Move candidate setups, 4-stage pipeline, net edge %, AI inspect).
+     - Screen 4: Trading Chart (Interactive SVG candlestick chart, VWAP band, volume sub-pane, execution lines for entry, hard stop, trailing stop, take profit).
+     - Screen 5: Position Monitor (Active positions table, sub-50ms watcher state, double-confirmation square-off button).
+     - Screen 6: Orders & Execution (Order state machine lifecycle audit, broker return codes, zero arbitrary order submission).
+     - Screen 7: AI Analysis (Dual-model qualitative debate: Qwen3 thesis vs DeepSeek-R1 adversarial challenge, deterministic arbitration).
+     - Screen 8: Trade Journal (Immutable trade retrospective, entry/exit stamps, Indian statutory friction breakdown: STT, exchange, SEBI, GST, stamp duty).
+     - Screen 9: Performance Analytics (Win rate, profit factor, max drawdown, fee drag analysis, equity curve).
+     - Screen 10: Backtesting (Event-driven historical simulation, parameter controls, walk-forward stability).
+     - Screen 11: Risk & Capital (₹100 micro-cap meter, ₹300 autonomous limit, 3.0% daily drawdown circuit breaker gauge, risk event log).
+     - Screen 12: System Health (Local infrastructure diagnostics, SQLite WAL mode, Ollama inference, pipeline latency bars).
+     - Screen 13: Logs & Events (Structured telemetry stream, regex/search, severity filtering, JSON export).
+     - Screen 14: Strategy Management (Parameter tuning for Momentum Continuation & Early-Move Detection).
+     - Screen 15: Settings (Paper simulation mode, backend endpoint configuration, emergency webhooks).
+  5. **Global Navigation, Telemetry & Emergency Safety (`frontend/src/components/layout/`)**:
+     - `TopBar`: Real-time account facts (₹100.00 base, deployed, available, daily P&L; paper mode active indicator).
+     - `NavBar`: Clean 15-tab navigation bar with number shortcuts and Lucide icons.
+     - `StatusBar`: Fixed bottom bar reporting feeds, Ollama standby, Watcher tick health (<50ms), and SQLite WAL state.
+     - `KillSwitchModal`: Double-confirmation safety dialog triggering immediate Position Watcher square-off and system halt.
+  6. **Resilient Data Layer (`frontend/src/services/api.ts`, `frontend/src/data/mockData.ts`)**:
+     - Queries FastAPI backend endpoints with automatic graceful fallback to realistic paper trading mock fixtures.
+- **Consequences**: Complete professional dark-first trading terminal; zero cognitive confusion between deterministic broker facts and probabilistic AI reasoning; verified emergency shutdown controls; full alignment with `UI_UX_SPEC.md`.
+- **Verification Evidence**:
+  - `npm run build` compiles with zero TypeScript errors and bundles into optimized production assets via Vite (`tsc -b && vite build` built in 1.86s).
+  - Complete backend test suite passing (167/167 tests passing).
+  - Static checks clean (`ruff check backend` and `mypy backend` passing with 0 errors).
+
 
 
 
