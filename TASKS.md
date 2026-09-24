@@ -163,15 +163,23 @@ Status Key:
   - [x] Implement decision audit trail reconstruction ensuring full decision reproducibility (`is_fully_reproducible`)
   - [x] Implement crash/restart recovery rehydrating `IndependentPositionWatcher`, `CapitalManager`, and `ExecutionEngine` from persistent database state
   - [x] All 8 Phase 13 unit/integration tests passing (149 total test suite passing, ruff & mypy clean)
-- [!] Phase 13 Phase Gate Checkpoint (Awaiting User Sign-off)
+- [x] Phase 13 Phase Gate Checkpoint (APPROVED)
 
 ---
 
 ## Phase 14: FastAPI Backend + API Contracts
-- [ ] Prepare Codex delegation spec for FastAPI endpoints
-- [ ] Codex: Implement query/read endpoints and guarded command APIs
-- [ ] Antigravity: Verify endpoint security and live-trading guardrails
-- [!] Phase 14 Phase Gate Checkpoint
+- [x] Prepare Codex delegation spec for FastAPI endpoints
+- [x] Codex: Implement query/read endpoints and guarded command APIs (`backend/app/api/schemas.py`, `backend/app/api/deps.py`, `backend/app/api/v1/endpoints/`, `backend/app/api/v1/router.py`, `backend/app/main.py`)
+- [x] Antigravity: Verify endpoint security and live-trading guardrails (`backend/tests/test_api_v1.py`)
+  - [x] Expose safe read/query APIs across all 13 core categories: dashboard summary, capital, market scanner & features, candidates, positions, orders, trades, trade plans, P/L breakdown, AI council analyses & latency, performance & execution metrics, backtests, risk status & limits, system health & operational logs
+  - [x] Segregate read APIs from mutation/execution APIs
+  - [x] Eliminate unrestricted arbitrary order endpoints (`POST /orders` strictly forbidden / 405 Method Not Allowed; execution only via validated TradePlan approval)
+  - [x] Guard TradePlan approval/rejection workflows with system state validation (cannot approve when halted)
+  - [x] Guard live-trading mode transitions and approvals behind explicit authorization token verification and environment lockouts
+  - [x] Implement multi-component system health probes and emergency kill switch invoking Position Watcher
+  - [x] Full OpenAPI v3 interactive documentation mounted at `/api/docs` and `/api/redoc` with CORS middleware configured
+  - [x] All 18 Phase 14 API tests passing (167 total test suite passing, ruff & mypy clean)
+- [!] Phase 14 Phase Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 

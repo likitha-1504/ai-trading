@@ -241,7 +241,7 @@ This document tracks all critical architectural, design, and technical decisions
 
 ## ADR-016: SQLite WAL Schema, Persistent Trade Journal, Performance Analytics, and Restart Recovery
 - **Date**: 2026-09-24
-- **Status**: PENDING APPROVAL (Phase 13 Gate Checkpoint)
+- **Status**: APPROVED (Phase 13 Gate Sign-Off)
 - **Context**: Phase 13 of the AI Micro-Trading Agent requires a persistent SQLite database with Write-Ahead Logging (WAL) and safe transaction handling to persist all 13 core architectural entities, record executed trade lifecycle journals, compute accurate statutory P/L, aggregate strategy/model/execution performance metrics, provide an auditable decision reconstruction trail (`is_fully_reproducible`), and enable clean restart recovery for system controllers without state corruption.
 - **Decision**:
   1. **SQLite WAL & Connection Management (`backend/app/db/schema.py`, `backend/app/db/connection.py`, `backend/app/db/session.py`)**:
@@ -270,6 +270,46 @@ This document tracks all critical architectural, design, and technical decisions
   - 8 comprehensive unit and integration tests passing in `backend/tests/test_database_journal_performance.py`.
   - Full project test suite passing (149/149 tests passing).
   - Static type checking (`mypy backend`) and linting (`ruff check backend`) passing with zero errors across all 81 source files.
+
+---
+
+## ADR-017: FastAPI Backend, Segregated API Contracts, Guarded TradePlan Approvals, and Live-Trading Protection
+- **Date**: 2026-09-24
+- **Status**: PENDING APPROVAL (Phase 14 Gate Checkpoint)
+- **Context**: Phase 14 of the AI Micro-Trading Agent requires a FastAPI backend exposing safe read/query APIs across all 13 system aspects, segregating read queries from mutation/execution endpoints, strictly forbidding arbitrary order submission (e.g., `POST /orders` is strictly forbidden and returns 405 Method Not Allowed), guarding TradePlan approval/rejection workflows, and protecting live trading under explicit human confirmation, approval tokens, and strict safety controls.
+- **Decision**:
+  1. **Segregated API Contract Schemas (`backend/app/api/schemas.py`)**:
+     - Implement dedicated Pydantic v2 schemas for all 13 read domains and guarded mutation payloads (`DashboardSummaryResponse`, `CapitalResponse`, `MarketScannerItem`, `PnLSummaryResponse`, `ModelLatencyStats`, `RiskStatusResponse`, `RiskLimitsResponse`, `SystemHealthResponse`, `AuditTrailResponse`, `PlanApprovalRequest`, `PlanApprovalResponse`, `KillSwitchRequest`, `KillSwitchResponse`, `ModeSwitchRequest`, `ModeSwitchResponse`).
+  2. **Dependency Injection & Architectural Boundary Enforcement (`backend/app/api/deps.py`)**:
+     - Implement singleton/scoped dependency providers for database repository, trade journal, performance aggregator, decision audit manager, restart recovery manager, system state, capital manager, position watcher, execution engine, and deterministic trade gate.
+     - Implement `verify_live_trading_authorization` enforcing authorization headers and environment-level safeguards against accidental or unauthorized live execution.
+  3. **Modular Domain Routers (`backend/app/api/v1/endpoints/`)**:
+     - Expose 13 safe read/query endpoint suites:
+       - `/dashboard`: High-level summary and real-time capital state.
+       - `/market`: Real-time market scanner feed and technical features.
+       - `/candidates`: Strategy-detected trading candidates.
+       - `/positions`: Active positions tracked with real-time unrealized P/L and stops.
+       - `/orders`: Read-only order audit log and status queries. No `POST /orders` endpoint is exposed.
+       - `/trades`: Immutable executed trade journal with gross/net P/L and friction breakdowns. Guarded `POST /trades/approve/{plan_id}` and `POST /trades/reject/{plan_id}` endpoints allow explicit human approvals for pending trade plans.
+       - `/trade-plans`: Synthesized TradePlan blueprints.
+       - `/pnl`: Aggregate and periodic P/L summaries with statutory friction breakdowns.
+       - `/ai`: Dual-model AI Council qualitative theses, critiques, and model latency metrics.
+       - `/performance`: Strategy-level financial KPIs and execution fill metrics.
+       - `/backtests`: Backtesting simulation runs and historical trade logs.
+       - `/risk`: Real-time drawdown, circuit breakers, risk events, and limit configurations.
+       - `/system`: Multi-component health probes (SQLite WAL, Position Watcher, Execution Engine, AI Council), operational status, guarded mode switches, and emergency kill-switch (`POST /system/kill-switch`) invoking Position Watcher square-off.
+       - `/logs`: System operational logs and end-to-end decision provenance reconstruction (`/logs/audit/{candidate_id}`).
+  4. **Strict Arbitrary Order Execution Prohibition & Guardrails**:
+     - The backend explicitly does NOT expose any endpoint for arbitrary order submission (`POST /orders` is forbidden / 405). Orders can only ever be generated and dispatched through an approved `TradePlan` evaluated by the `DeterministicTradeGate`.
+     - System-halted state prevents any trade plan approvals.
+  5. **Application Configuration & Interactive Docs (`backend/app/main.py`)**:
+     - Configure CORS middleware, error handlers, and interactive OpenAPI documentation at `/api/docs` and `/api/redoc`.
+- **Consequences**: Safe, decoupled, and transparent API layer; eliminates arbitrary order injection attack vectors; ensures live-trading actions require deliberate human authentication; provides unified telemetry across facts, AI suggestions, and deterministic execution.
+- **Verification Evidence**:
+  - 18 comprehensive API tests passing in `backend/tests/test_api_v1.py` covering all 13 read domains, 405 Method Not Allowed for arbitrary order creation, plan approvals, live mode security locks, and emergency kill-switch.
+  - Complete project test suite passing (167/167 tests passing).
+  - Static type checking (`mypy backend`) and linting (`ruff check backend`) passing with zero errors across all 99 source files.
+
 
 
 

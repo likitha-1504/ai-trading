@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS trades (
     gross_pnl REAL DEFAULT 0.0,
     net_pnl REAL DEFAULT 0.0,
     holding_duration_seconds REAL DEFAULT 0.0,
+    exit_trigger TEXT DEFAULT 'TIME_EXPIRY',
     executed_at TEXT NOT NULL
 );
 

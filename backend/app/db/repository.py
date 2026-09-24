@@ -202,6 +202,14 @@ class DatabaseRepository:
             cur = conn.execute("SELECT * FROM positions WHERE status = 'OPEN'")
             return [self._row_to_position(r) for r in cur.fetchall()]
 
+    def get_all_positions(self, limit: int = 50) -> list[PositionSnapshot]:
+        """Retrieve recent positions (open and closed)."""
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                "SELECT * FROM positions ORDER BY opened_at DESC LIMIT ?", (limit,)
+            )
+            return [self._row_to_position(r) for r in cur.fetchall()]
+
     def _row_to_position(self, r: Any) -> PositionSnapshot:
         side_val = r["side"]
         if side_val in ("LONG", "BUY"):
@@ -331,6 +339,14 @@ class DatabaseRepository:
             )
             return [dict(r) for r in cur.fetchall()]
 
+    def get_all_orders(self, limit: int = 50) -> list[dict[str, Any]]:
+        """Retrieve all recent orders."""
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                "SELECT * FROM orders ORDER BY created_at DESC LIMIT ?", (limit,)
+            )
+            return [dict(r) for r in cur.fetchall()]
+
     # =========================================================================
     # 4. Trades
     # =========================================================================
@@ -345,8 +361,8 @@ class DatabaseRepository:
                     id, order_id, position_id, plan_id, symbol, side, strategy,
                     quantity, price, fee_brokerage, fee_stt, fee_exchange, fee_sebi,
                     fee_stamp_duty, fee_gst, slippage, total_friction, gross_pnl,
-                    net_pnl, holding_duration_seconds, executed_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    net_pnl, holding_duration_seconds, exit_trigger, executed_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     trade.trade_id,
@@ -369,6 +385,7 @@ class DatabaseRepository:
                     float(trade.gross_pnl),
                     float(trade.net_pnl),
                     float(trade.holding_duration_seconds),
+                    trade.exit_trigger.value,
                     trade.exit_timestamp.isoformat(),
                 ),
             )
@@ -410,6 +427,10 @@ class DatabaseRepository:
             cur = conn.execute(query, params)
             return [self._row_to_trade(r) for r in cur.fetchall()]
 
+    def get_recent_trades(self, limit: int = 50) -> list[TradeRecord]:
+        """Retrieve recent executed trade records."""
+        return self.get_trades(limit=limit)
+
     def _row_to_trade(self, r: Any) -> TradeRecord:
         friction = FrictionBreakdown(
             brokerage=Decimal(str(r["fee_brokerage"])),
@@ -422,6 +443,12 @@ class DatabaseRepository:
             total_friction=Decimal(str(r["total_friction"])),
         )
         ts = datetime.fromisoformat(r["executed_at"])
+        trigger_raw = dict(r).get("exit_trigger") or "TIME_EXPIRY"
+        try:
+            exit_trigger = WatcherExitTrigger(trigger_raw)
+        except ValueError:
+            exit_trigger = WatcherExitTrigger.TIME_EXPIRY
+
         return TradeRecord(
             trade_id=r["id"],
             plan_id=r["plan_id"] or "",
@@ -435,7 +462,7 @@ class DatabaseRepository:
             exit_timestamp=ts,
             exit_price=Decimal(str(r["price"])),
             exit_slippage=Decimal(str(r["slippage"])),
-            exit_trigger=WatcherExitTrigger.TIME_EXPIRY,
+            exit_trigger=exit_trigger,
             gross_pnl=Decimal(str(r["gross_pnl"])),
             friction=friction,
             net_pnl=Decimal(str(r["net_pnl"])),
@@ -534,6 +561,19 @@ class DatabaseRepository:
                 feature_snapshot=fs_data,
             )
 
+    def get_recent_candidates(self, limit: int = 50) -> list[Candidate]:
+        """Retrieve recent discovered candidates."""
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                "SELECT id FROM candidates ORDER BY timestamp DESC LIMIT ?", (limit,)
+            )
+            results: list[Candidate] = []
+            for r in cur.fetchall():
+                cand = self.get_candidate(r["id"])
+                if cand:
+                    results.append(cand)
+            return results
+
     # =========================================================================
     # 6. Features
     # =========================================================================
@@ -577,24 +617,42 @@ class DatabaseRepository:
             r = cur.fetchone()
             if not r:
                 return None
-            return FeatureSnapshot(
-                symbol=r["symbol"],
-                timestamp=datetime.fromisoformat(r["timestamp"]),
-                bar_timeframe=r["timeframe"],
-                vwap=Decimal(str(r["vwap"])),
-                current_price=Decimal(str(r["current_price"])),
-                vwap_distance_pct=Decimal("0.0"),
-                momentum_score=Decimal(str(r["momentum_score"])),
-                relative_volume_10=Decimal(str(r["relative_volume"])),
-                volume_acceleration=Decimal(str(r["volume_accel"])),
-                price_acceleration=Decimal(str(r["price_accel"])),
-                realized_volatility_15=Decimal(str(r["volatility"])),
-                spread_pct=Decimal(str(r["spread"])),
-                liquidity_score=Decimal(str(r["liquidity_score"])),
-                market_index_direction="NEUTRAL",
-                price_structure="RANGE",
-                regime=MarketRegime(r["regime"]),
+            return self._row_to_feature(r)
+
+    def _row_to_feature(self, r: Any) -> FeatureSnapshot:
+        return FeatureSnapshot(
+            symbol=r["symbol"],
+            timestamp=datetime.fromisoformat(r["timestamp"]),
+            bar_timeframe=r["timeframe"],
+            vwap=Decimal(str(r["vwap"])),
+            current_price=Decimal(str(r["current_price"])),
+            vwap_distance_pct=Decimal("0.0"),
+            momentum_score=Decimal(str(r["momentum_score"])),
+            relative_volume_10=Decimal(str(r["relative_volume"])),
+            volume_acceleration=Decimal(str(r["volume_accel"])),
+            price_acceleration=Decimal(str(r["price_accel"])),
+            realized_volatility_15=Decimal(str(r["volatility"])),
+            spread_pct=Decimal(str(r["spread"])),
+            liquidity_score=Decimal(str(r["liquidity_score"])),
+            market_index_direction="NEUTRAL",
+            price_structure="RANGE",
+            regime=MarketRegime(r["regime"]),
+        )
+
+    def get_all_latest_features(self) -> list[FeatureSnapshot]:
+        """Retrieve most recent FeatureSnapshot for each distinct symbol."""
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                """
+                SELECT f.* FROM features f
+                INNER JOIN (
+                    SELECT symbol, MAX(id) as max_id
+                    FROM features
+                    GROUP BY symbol
+                ) latest ON f.id = latest.max_id
+                """
             )
+            return [self._row_to_feature(r) for r in cur.fetchall()]
 
     # =========================================================================
     # 7. AI Analyses
@@ -682,6 +740,14 @@ class DatabaseRepository:
             cur = conn.execute(
                 "SELECT * FROM ai_analyses WHERE candidate_id = ? ORDER BY created_at ASC",
                 (candidate_id,),
+            )
+            return [dict(r) for r in cur.fetchall()]
+
+    def get_all_ai_analyses(self, limit: int = 50) -> list[dict[str, Any]]:
+        """Retrieve recent AI analyses across all candidates."""
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                "SELECT * FROM ai_analyses ORDER BY created_at DESC LIMIT ?", (limit,)
             )
             return [dict(r) for r in cur.fetchall()]
 
@@ -816,6 +882,22 @@ class DatabaseRepository:
             decision_reason=r["decision_reason"],
             approval_mode=ApprovalMode(r["approval_mode"]),
         )
+
+    def update_trade_plan_approval(self, plan_id: str, mode: ApprovalMode) -> None:
+        """Update approval mode of a TradePlan."""
+        with get_connection(self.db_path) as conn:
+            conn.execute(
+                "UPDATE trade_plans SET approval_mode = ? WHERE id = ?",
+                (mode.value, plan_id),
+            )
+
+    def get_recent_trade_plans(self, limit: int = 50) -> list[TradePlan]:
+        """Retrieve recent trade plans."""
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                "SELECT * FROM trade_plans ORDER BY created_at DESC LIMIT ?", (limit,)
+            )
+            return [self._row_to_trade_plan(r) for r in cur.fetchall()]
 
     # =========================================================================
     # 9. Risk Events
