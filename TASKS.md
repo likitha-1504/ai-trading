@@ -118,15 +118,15 @@ Status Key:
 - [x] Prepare Codex delegation spec for Qwen3 integration
 - [x] Codex: Implement structured JSON schema, prompt templates, and timeout handlers (`backend/app/ai/config.py`, `backend/app/ai/prompts.py`, `backend/app/ai/validator.py`, `backend/app/ai/metrics.py`, `backend/app/ai/client.py`)
 - [x] Antigravity: Verify AI output validation and fallback behavior (`backend/tests/test_qwen3_analyst.py`)
-- [!] Phase 10 Phase Gate Checkpoint (Awaiting User Sign-off)
+- [x] Phase 10 Phase Gate Checkpoint (APPROVED)
 
 ---
 
 ## Phase 11: DeepSeek-R1 Challenger Layer
-- [ ] Prepare Codex delegation spec for adversarial challenger
-- [ ] Codex: Implement critique prompts, stress testing, and structured schema
-- [ ] Antigravity: Verify deterministic gate retains final decision authority
-- [!] Phase 11 Phase Gate Checkpoint
+- [x] Prepare Codex delegation spec for adversarial challenger
+- [x] Codex: Implement critique prompts, stress testing, and structured schema (`backend/app/ai/challenger_config.py`, `backend/app/ai/challenger_prompts.py`, `backend/app/ai/challenger_validator.py`, `backend/app/ai/challenger_client.py`)
+- [x] Antigravity: Verify deterministic gate retains final decision authority (`backend/app/ai/council_evaluator.py`, `backend/tests/test_deepseek_r1_challenger.py`)
+- [!] Phase 11 Phase Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 

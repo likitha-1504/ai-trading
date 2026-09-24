@@ -170,19 +170,37 @@ class MarketThesis(BaseModel):
     raw_response: str | None = None
 
 
+class ChallengerSeverity(str, Enum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    SEVERE = "SEVERE"
+
+
+class ChallengerRecommendation(str, Enum):
+    CONFIRM = "CONFIRM"
+    CONTEST = "CONTEST"
+    VETO_CANDIDATE = "VETO_CANDIDATE"
+
+
 class ChallengerCritique(BaseModel):
     """DeepSeek-R1 Adversarial Reasoner output schema."""
 
     candidate_id: str
     model_name: str = "deepseek-r1:latest"
+    model_version: str = "v1.0"
+    prompt_version: str
     critique_summary: str
     identified_vulnerabilities: list[str]
     contradictory_signals: list[str]
+    missing_evidence: list[str] = Field(default_factory=list)
+    invalidation_conditions: list[str] = Field(default_factory=list)
     worst_case_scenario: str
-    downside_severity: str  # LOW / MEDIUM / SEVERE
-    recommendation_flag: str  # CONFIRM / CONTEST / VETO_CANDIDATE
+    downside_severity: ChallengerSeverity = ChallengerSeverity.MEDIUM
+    recommendation_flag: ChallengerRecommendation = ChallengerRecommendation.CONFIRM
     latency_ms: int
-    prompt_version: str
+    token_count: int | None = None
+    is_fallback: bool = False
+    raw_response: str | None = None
 
 
 # =====================================================================

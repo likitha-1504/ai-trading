@@ -180,7 +180,7 @@ This document tracks all critical architectural, design, and technical decisions
 
 ## ADR-013: Qwen3 Primary Market Analyst Integration, Structured Qualitative Evidence, and Deterministic Fallback Gating
 - **Date**: 2026-09-24
-- **Status**: PENDING APPROVAL (Phase 10 Gate Checkpoint)
+- **Status**: APPROVED (Phase 10 Gate Sign-Off)
 - **Context**: Autonomous micro-trading requires qualitative analysis of pre-screened technical setups (catalyst identification, bullish evidence, market context, perceived risks, invalidation criteria) while ensuring LLM latency, probabilistic hallucinations, network timeouts, or malformed JSON payloads cannot destabilize the system or bypass risk controls.
 - **Decision**:
   1. Restrict Qwen3 inputs strictly to structured feature summaries (`FeatureSnapshot`) and candidate context (`Candidate`), completely eliminating raw tick stream leakage into the LLM prompt context (`backend/app/ai/prompts.py`).
@@ -190,3 +190,23 @@ This document tracks all critical architectural, design, and technical decisions
   5. Enforce deterministic safe fallbacks on model unavailability, timeouts, or malformed outputs via `create_fallback_thesis()`, assigning confidence score `0.0`, `CAUTION` action, and `is_fallback=True`, ensuring zero trade execution authority or risk bypass.
   6. Collect runtime telemetry in `AIAnalystMetrics` (`backend/app/ai/metrics.py`) tracking request counts, successes, failures, timeouts, malformed responses, fallbacks, token counts, and average/P95 latencies.
 - **Consequences**: Qualitative AI reasoning is cleanly integrated into the evidence-gathering pipeline; zero risk of LLM hallucinations triggering orders or bypassing risk rules; complete resilience against Ollama/network downtime.
+
+---
+
+## ADR-014: DeepSeek-R1 Adversarial Challenger Integration, Think-Tag Sanitization, and Deterministic Dispute Arbitration
+- **Date**: 2026-09-24
+- **Status**: PENDING APPROVAL (Phase 11 Gate Checkpoint)
+- **Context**: Relying on a single qualitative AI analyst (Qwen3) introduces susceptibility to confirmation bias, overlooked structural risks, and unexamined assumptions. Adding an adversarial challenger (DeepSeek-R1) provides critical stress-testing, but simple majority voting or probabilistic resolution must never decide trade authorization. The deterministic Trade Gate must retain ultimate authority.
+- **Decision**:
+  1. Restrict DeepSeek-R1 inputs to structured candidate metrics (`FeatureSnapshot`, `Candidate`) AND Qwen3's qualitative analysis (`MarketThesis`), preserving complete isolation from raw tick streams (`backend/app/ai/challenger_prompts.py`).
+  2. Implement strict Pydantic contract schemas in `app.models.contracts` (`ChallengerCritique`, `ChallengerSeverity`, `ChallengerRecommendation`), capturing critique summary, identified vulnerabilities, contradictory signals, missing evidence, invalidation conditions, worst-case scenario, downside severity (`LOW`, `MEDIUM`, `SEVERE`), and recommendation flag (`CONFIRM`, `CONTEST`, `VETO_CANDIDATE`).
+  3. Implement `DeepSeekR1OutputValidator` in `backend/app/ai/challenger_validator.py` with special handling for DeepSeek-R1 `<think>...</think>` internal chain-of-thought blocks, markdown fences, and JSON boundary isolation.
+  4. Implement `DeepSeekR1ChallengerClient` in `backend/app/ai/challenger_client.py` with asynchronous and synchronous interfaces, per-request timeouts (default 5.0s), exponential backoff retries, and comprehensive exception trapping with structured audit logging.
+  5. Enforce deterministic safe fallbacks on model unavailability, timeouts, or malformed JSON via `create_fallback_critique()`, assigning `ChallengerRecommendation.CONTEST`, `ChallengerSeverity.MEDIUM`, and `is_fallback=True`, ensuring unverified trades never receive automatic clearance.
+  6. Enforce deterministic council dispute arbitration in `backend/app/ai/council_evaluator.py`:
+     - Reject immediately if Qwen3 rejects or confidence falls below minimum hurdle.
+     - Reject immediately if DeepSeek-R1 issues `VETO_CANDIDATE` with `SEVERE` downside.
+     - When Qwen3 is bullish (`PROCEED`) and DeepSeek-R1 contests (`CONTEST`), arbitrate using strictly empirical quantitative metrics (spread friction <= 15 bps, liquidity score >= 70.0, stop risk validation). Empirical compliance grants clearance with `CAUTION` and audited risk notes; empirical failure triggers immediate rejection.
+     - Never use simple majority voting or probabilistic resolution.
+- **Consequences**: Rigorous adversarial stress-testing without introducing deadlock or probabilistic risk leakage; guaranteed supremacy of empirical math and deterministic safety rules.
+
