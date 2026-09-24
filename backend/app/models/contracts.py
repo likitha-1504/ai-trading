@@ -424,3 +424,122 @@ class WatcherInterventionEvent(BaseModel):
     trigger_price: Decimal
     executed_exit_order_id: str
     details: str
+
+
+# =====================================================================
+# 8. Backtest, Paper Trading & Performance Contracts
+# =====================================================================
+
+
+class TradeRecord(BaseModel):
+    """Detailed immutable historical trade journal record."""
+
+    trade_id: str
+    plan_id: str
+    symbol: str
+    side: TradeSide
+    strategy: StrategyType
+    quantity: int
+    entry_timestamp: datetime
+    entry_price: Decimal
+    entry_slippage: Decimal
+    exit_timestamp: datetime
+    exit_price: Decimal
+    exit_slippage: Decimal
+    exit_trigger: WatcherExitTrigger
+    gross_pnl: Decimal
+    friction: FrictionBreakdown
+    net_pnl: Decimal
+    holding_duration_seconds: float
+    market_regime_at_entry: MarketRegime
+    market_regime_at_exit: MarketRegime
+
+
+class EquityPoint(BaseModel):
+    """Point-in-time portfolio valuation for equity curve tracking."""
+
+    timestamp: datetime
+    total_equity: Decimal
+    cash_balance: Decimal
+    unrealized_pnl: Decimal
+    drawdown_amount: Decimal
+    drawdown_pct: float
+
+
+class PerformanceMetrics(BaseModel):
+    """Exhaustive backtest and paper performance telemetry."""
+
+    total_trades: int
+    winning_trades: int
+    losing_trades: int
+    win_rate: float
+    gross_pnl: Decimal
+    total_friction: Decimal
+    net_pnl: Decimal
+    profit_factor: float
+    expectancy: Decimal
+    average_trade: Decimal
+    average_win: Decimal
+    average_loss: Decimal
+    max_drawdown_amount: Decimal
+    max_drawdown_pct: float
+    trade_frequency_per_day: float
+    friction_pct_of_gross_profit: float
+    regime_pnl: dict[str, Decimal] = Field(default_factory=dict)
+    regime_trades: dict[str, int] = Field(default_factory=dict)
+
+
+class BacktestReport(BaseModel):
+    """Comprehensive backtesting run evaluation outcome."""
+
+    run_id: str
+    start_time: datetime
+    end_time: datetime
+    initial_capital: Decimal
+    final_equity: Decimal
+    slippage_ticks: int
+    metrics: PerformanceMetrics
+    trades: list[TradeRecord]
+    equity_curve: list[EquityPoint]
+
+
+class WalkForwardWindow(BaseModel):
+    """In-sample and out-of-sample partition evaluation for a single walk-forward window."""
+
+    window_index: int
+    in_sample_start: datetime
+    in_sample_end: datetime
+    out_of_sample_start: datetime
+    out_of_sample_end: datetime
+    in_sample_metrics: PerformanceMetrics
+    out_of_sample_metrics: PerformanceMetrics
+    out_of_sample_degradation_pct: float
+
+
+class WalkForwardReport(BaseModel):
+    """Walk-forward / out-of-sample stability analysis report."""
+
+    total_windows: int
+    windows: list[WalkForwardWindow]
+    avg_out_of_sample_profit_factor: float
+    avg_out_of_sample_expectancy: Decimal
+    is_overfitted: bool
+
+
+class SlippageSensitivityPoint(BaseModel):
+    """Backtest performance at a specific simulated slippage level."""
+
+    slippage_ticks: int
+    net_pnl: Decimal
+    profit_factor: float
+    expectancy: Decimal
+    total_slippage_cost: Decimal
+
+
+class SlippageSensitivityReport(BaseModel):
+    """Slippage sensitivity evaluation comparing zero-slippage vs multiple slippage levels."""
+
+    base_ticks: int
+    evaluations: list[SlippageSensitivityPoint]
+    is_viable_at_high_slippage: bool
+

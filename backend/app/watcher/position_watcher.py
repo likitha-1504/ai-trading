@@ -70,6 +70,20 @@ class IndependentPositionWatcher:
             "Position %s for %s registered with Watcher", position.position_id, sym
         )
 
+    def register_position(self, position: PositionSnapshot) -> None:
+        """Register a new active position under surveillance (alias for open_position)."""
+        self.open_position(position)
+
+    def deregister_position(self, position_id: str) -> None:
+        """Remove a closed position from active surveillance."""
+        pos = self._positions.pop(position_id, None)
+        if pos is not None:
+            sym = pos.symbol.upper()
+            if sym in self._symbol_positions:
+                self._symbol_positions[sym].discard(position_id)
+                if not self._symbol_positions[sym]:
+                    self._symbol_positions.pop(sym, None)
+
     def get_position(self, position_id: str) -> PositionSnapshot | None:
         """Retrieve an active position snapshot."""
         return self._positions.get(position_id)

@@ -148,3 +148,31 @@ This document tracks all critical architectural, design, and technical decisions
      - Hard-coded `is_live = False` safety lock ensuring zero live market interaction in Phase 08.
   5. Implement `ExecutionMetricsTracker` in `backend/app/execution/metrics.py` recording order lifecycle counts, cumulative filled quantities, realized slippage, and average submission/acknowledgement/fill latencies in milliseconds.
 - **Consequences**: Zero broker lock-in, mathematically sound idempotency, high-fidelity paper trading execution matching live constraints, auditable reconciliation and latency telemetry, and guaranteed lockout of real-money live execution.
+
+---
+
+## ADR-012: Event-Driven Backtester, Paper Trading Loop, and Quantitative Evaluation Metrics
+- **Date**: 2026-09-24
+- **Status**: PENDING APPROVAL (Phase 09 Gate Checkpoint)
+- **Context**: Validating algorithmic strategies on micro-capital requires a simulation framework that eliminates lookahead and survivorship bias, models realistic transaction friction and slippage, shares 100% strategy and execution interfaces with live/paper pipelines, prevents overfitting via walk-forward analysis, and logs immutable trade journal audits without ever enabling real-money live order routing.
+- **Decision**:
+  1. Implement `BacktestEngine` in `backend/app/backtesting/simulator.py`:
+     - Sequential event-driven processing enforcing strictly non-decreasing timestamps (`TimestampOrderError` on violation).
+     - Point-in-time universe filtering to eliminate survivorship bias.
+     - Integration with `FeatureEngine`, `CandidateRanker`, `RiskEngine`, `CapitalManager`, `PaperAdapter`, and `IndependentPositionWatcher`.
+     - Zero lookahead bias: each feature and decision relies only on past/current events.
+  2. Implement `PaperTradingLoop` in `backend/app/backtesting/paper_loop.py`:
+     - Continuous market event consumption maintaining 100% strategy interface symmetry with backtesting.
+     - Hard-coded `is_live = False` safety invariant guaranteeing live broker lockout.
+  3. Implement `IndianMarketCostModel` integration:
+     - Real-time deduction of statutory brokerage, STT, exchange charges, SEBI turnover fees, stamp duty, and GST on entry and exit fills.
+  4. Implement `TradeJournal` in `backend/app/backtesting/journal.py`:
+     - Detailed immutable `TradeRecord` items capturing trade lifecycle, prices, tick slippage, friction breakdowns, gross and net P/L, holding durations, and entry/exit market regimes.
+  5. Implement `PerformanceCalculator` in `backend/app/backtesting/metrics.py`:
+     - Computing net P/L, financial expectancy, profit factor, maximum drawdown amount/percentage, trade frequency per day, average trade, friction percentage of gross profit, and regime-stratified P/L.
+  6. Implement `WalkForwardAnalyzer` in `backend/app/backtesting/walk_forward.py`:
+     - Partitioning historical event streams into in-sample and out-of-sample segments to assess performance degradation and flag statistical overfitting.
+  7. Implement `SlippageSensitivityAnalyzer` in `backend/app/backtesting/slippage_analysis.py`:
+     - Stress-testing trading edge persistence across varying slippage tick increments (0, 1, 2, 3 ticks).
+- **Consequences**: Provably unbiased historical and real-time paper evaluation; identical strategy execution across simulation and production; complete auditability through TradeJournal; zero risk of capital loss or accidental live order execution.
+

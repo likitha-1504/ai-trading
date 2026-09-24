@@ -107,10 +107,10 @@ Status Key:
 ---
 
 ## Phase 09: Backtesting + Paper Trading Loop
-- [ ] Prepare Codex delegation spec for event-driven backtesting
-- [ ] Codex: Implement simulator, slippage model, and performance metrics
-- [ ] Antigravity: Verify backtest/paper strategy interface symmetry
-- [!] Phase 09 Phase Gate Checkpoint
+- [x] Prepare Codex delegation spec for event-driven backtesting
+- [x] Codex: Implement simulator, slippage model, and performance metrics (`backend/app/backtesting/simulator.py`, `backend/app/backtesting/paper_loop.py`, `backend/app/backtesting/metrics.py`, `backend/app/backtesting/journal.py`, `backend/app/backtesting/walk_forward.py`, `backend/app/backtesting/slippage_analysis.py`)
+- [x] Antigravity: Verify backtest/paper strategy interface symmetry, zero lookahead/survivorship bias, and Indian friction fidelity (`backend/tests/test_backtesting.py`)
+- [!] Phase 09 Phase Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 
