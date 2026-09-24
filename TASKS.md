@@ -209,15 +209,30 @@ Status Key:
   - [x] Verified zero guaranteed language on probabilistic AI outputs; AI models visually distinguished with dashed purple borders and explicit disclaimers
   - [x] Verified emergency kill-switch double-confirmation modal invoking Position Watcher square-off
   - [x] Successful production build verification (`tsc -b && vite build` bundled cleanly in <2s with 0 errors)
-  - [x] Complete Python test suite passing (167/167 tests passing, ruff & mypy clean)
-- [!] Phase 15 Phase Gate Checkpoint (Awaiting User Sign-off)
+  - [x] Phase 15 Phase Gate Checkpoint (APPROVED)
 
 ---
 
 ## Phase 16: Integration, Failure Injection & QA
-- [ ] Antigravity QA Suite: Inject network drops, stale data, and LLM timeouts
-- [ ] Verify Position Watcher intervention during simulated model crashes
-- [!] Phase 16 Release Readiness Gate
+- [x] Antigravity QA Suite: Inject network drops, stale data, and LLM timeouts (`backend/tests/test_phase16_failure_injection.py`)
+  - [x] Inject failure 1: Market data feed disconnect and reconnect
+  - [x] Inject failure 2: Broker disconnect during order submission (socket drops)
+  - [x] Inject failure 3: Stale quote detection (>15s quote freeze triggers `STALE_DATA_EMERGENCY`)
+  - [x] Inject failure 4: Model latency timeout (>2.5s read timeout triggers fallback thesis)
+  - [x] Inject failure 5: Qwen3 analyst completely unavailable (HTTP 503 / connection drop)
+  - [x] Inject failure 6: DeepSeek-R1 challenger completely unavailable (HTTP 503 / connection drop)
+  - [x] Inject failure 7: Malformed AI output (non-JSON text, truncated schemas, unverified boundaries)
+  - [x] Inject failure 8: Partial fill handling and sequential fill state transitions
+  - [x] Inject failure 9: Broker rejected orders without orphan or corrupted states
+  - [x] Inject failure 10: Duplicate order submission idempotency within 60s deduplication window
+  - [x] Inject failure 11: Database transaction failure and automatic rollback (ACID WAL preservation)
+  - [x] Inject failure 12: Sudden process crash recovery (rehydration of active positions, hard stops, capital state)
+  - [x] Inject failure 13: Laptop restart recovery (full system rehydration from SQLite WAL on startup)
+  - [x] Inject failure 14: Inconsistent local vs broker position state reconciliation (`ReconciliationReport`)
+- [x] Verify Position Watcher intervention during simulated model crashes (sub-50ms hard stops survive dead AI)
+- [x] Produce comprehensive Release Readiness Report (`RELEASE_READINESS_REPORT.md`)
+- [x] Verify full regression across unit, integration, API, and backtest suites (181/181 pytest passed, ruff & mypy clean, Vite build clean)
+- [!] Phase 16 Release Readiness Gate (Awaiting User Sign-off)
 
 ---
 

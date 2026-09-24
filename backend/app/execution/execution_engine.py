@@ -97,7 +97,25 @@ class ExecutionEngine:
         self.metrics.record_submitted(client_order_id, now)
 
         # 3. Route to Broker Adapter
-        order_event = self.broker_adapter.submit_order(request)
+        try:
+            order_event = self.broker_adapter.submit_order(request)
+        except Exception as exc:  # noqa: BLE001 - Protect engine from broker driver crashes
+            logger.error(
+                "Broker adapter error during submission of %s: %s",
+                client_order_id,
+                exc,
+            )
+            order_event = OrderEvent(
+                client_order_id=client_order_id,
+                broker_order_id=None,
+                symbol=request.symbol,
+                status=OrderStatus.REJECTED,
+                filled_quantity=0,
+                remaining_quantity=request.quantity,
+                average_fill_price=Decimal("0.00"),
+                rejection_reason=f"Broker disconnected: {exc}",
+                timestamp=now,
+            )
 
         # 4. Ingest and record outcome
         self._process_order_event(order_event, expected_price=request.price)

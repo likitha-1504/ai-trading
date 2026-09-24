@@ -314,7 +314,7 @@ This document tracks all critical architectural, design, and technical decisions
 
 ## ADR-018: React Trading Terminal, 15 Distinct Screens, Deterministic Fact Banners, and Emergency Kill-Switch UI
 - **Date**: 2026-09-24
-- **Status**: PENDING APPROVAL (Phase 15 Gate Checkpoint)
+- **Status**: APPROVED (Phase 15 Gate Sign-Off)
 - **Context**: Phase 15 of the AI Micro-Trading Agent requires building a complete React + TypeScript + Tailwind trading terminal adhering strictly to `UI_UX_SPEC.md` and Phase 15 requirements from the prompt pack. The interface must provide all 15 specified screens, strictly distinguish deterministic system facts from probabilistic AI hypotheses, support 15 visual badge states, provide a prominent emergency kill-switch with double-confirmation safety, and connect to realistic mock/paper telemetry feeds.
 - **Decision**:
   1. **Design Tokens & Dark-First Philosophy (`frontend/tailwind.config.js`, `frontend/src/index.css`)**:
@@ -354,6 +354,44 @@ This document tracks all critical architectural, design, and technical decisions
   - `npm run build` compiles with zero TypeScript errors and bundles into optimized production assets via Vite (`tsc -b && vite build` built in 1.86s).
   - Complete backend test suite passing (167/167 tests passing).
   - Static checks clean (`ruff check backend` and `mypy backend` passing with 0 errors).
+
+---
+
+## ADR-019: System Resiliency, Comprehensive Failure Injection Verification, and Release Readiness Gate
+- **Date**: 2026-09-24
+- **Status**: PENDING APPROVAL (Phase 16 Release Readiness Gate)
+- **Context**: Phase 16 of the AI Micro-Trading Agent requires end-to-end integration, failure injection, and QA verification across 14 failure vectors, verifying that deterministic hard risk protection remains 100% independent of LLM availability, compiling a formal Release Readiness Report (`RELEASE_READINESS_REPORT.md`), running full regressions, and halting at the Phase 16 Gate Checkpoint without enabling live trading or advancing into Phase 17.
+- **Decision**:
+  1. **Comprehensive Failure Injection Suite (`backend/tests/test_phase16_failure_injection.py`)**:
+     - Implement verified test fixtures covering all 14 failure modes:
+       1. Market data feed disconnect and reconnect handling.
+       2. Broker disconnect during order submission (socket reset handled with `OrderStatus.REJECTED` transition and audited reason).
+       3. Stale quote timeout (>15s quote freeze triggers `STALE_DATA_EMERGENCY` intervention).
+       4. Model latency timeout (>2.5s HTTP read timeout triggers safe fallback thesis).
+       5. Qwen3 analyst unavailable (HTTP 503 / connection drop handled with zero confidence fallback).
+       6. DeepSeek-R1 challenger unavailable (HTTP 503 / connection drop triggers `CONTEST` fallback critique).
+       7. Malformed AI output (strict `Qwen3OutputValidator` and `DeepSeekR1OutputValidator` raise typed parsing errors).
+       8. Partial order fills (order state machine sequences `PARTIALLY_FILLED` to `FILLED` tracking remainder).
+       9. Rejected broker orders (rejection codes recorded without orphan states).
+       10. Duplicate order submission idempotency (60s window blocks duplicates with `DuplicateOrderError`).
+       11. Database transaction failure and rollback (SQLite WAL automatically rolls back uncommitted writes upon error).
+       12. Process crash recovery (`RestartRecoveryManager` cleanly rehydrates active positions, hard stops, and capital).
+       13. Laptop restart recovery (full system rehydration from disk WAL).
+       14. Inconsistent local vs broker position state reconciliation (`PaperAdapter.reconcile()` detects quantity discrepancies and unrecorded positions).
+  2. **LLM Failure Independence Invariant**:
+     - Verify that `IndependentPositionWatcher` operates in an isolated, synchronous sub-50ms execution loop evaluating ticks directly against hard stop price triggers. Catastrophic price breaches immediately trigger market exit orders and mark positions closed with zero dependency on Ollama or LLM availability.
+  3. **Broker Disconnect Handling in Execution Engine (`backend/app/execution/execution_engine.py`)**:
+     - Wrap broker adapter submission calls in exception traps that catch connection drops, log audited errors, and transition the order state machine cleanly to `OrderStatus.REJECTED` rather than letting uncaught driver exceptions crash the execution loop.
+  4. **Formal Release Readiness Report (`RELEASE_READINESS_REPORT.md`)**:
+     - Document failure injection results, invariant safety matrix, test coverage statistics, static check results, frontend build outputs, latency budgets, and release gate recommendation.
+- **Consequences**: Complete empirical proof of system resilience, fault tolerance, and deterministic fail-safe behavior under adverse network, model, database, and process crash conditions.
+- **Verification Evidence**:
+  - 14/14 failure injection tests passing in `backend/tests/test_phase16_failure_injection.py`.
+  - 181/181 tests passing across 15 test suites in full `pytest` regression run.
+  - Static type checking clean (`mypy backend` passed across 100 source files).
+  - Linting clean (`ruff check backend` passed with 0 errors).
+  - Production frontend build clean (`npm run build` completed in 1.98s with 0 errors).
+  - `RELEASE_READINESS_REPORT.md` generated.
 
 
 
