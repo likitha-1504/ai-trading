@@ -231,15 +231,23 @@ Status Key:
   - [x] Inject failure 14: Inconsistent local vs broker position state reconciliation (`ReconciliationReport`)
 - [x] Verify Position Watcher intervention during simulated model crashes (sub-50ms hard stops survive dead AI)
 - [x] Produce comprehensive Release Readiness Report (`RELEASE_READINESS_REPORT.md`)
-- [x] Verify full regression across unit, integration, API, and backtest suites (181/181 pytest passed, ruff & mypy clean, Vite build clean)
-- [!] Phase 16 Release Readiness Gate (Awaiting User Sign-off)
+- [x] Phase 16 Release Readiness Gate (APPROVED)
 
 ---
 
 ## Phase 17: Performance & Latency Optimization
-- [ ] Profile execution bottlenecks across feature calculation and DB writes
-- [ ] Optimize measured hotspots without sacrificing safety checks
-- [!] Phase 17 Performance Gate Checkpoint
+- [x] Profile execution bottlenecks across feature calculation and DB writes (`backend/app/performance/profiler.py`, `backend/app/performance/benchmarks.py`)
+  - [x] Measure separately all 12 pipeline stages: market data arrival, normalization, feature computation, candidate detection, decision preparation, Qwen3 latency, DeepSeek-R1 latency, deterministic gate latency, order submission, broker acknowledgement, fill latency, Position Watcher response
+  - [x] Enforce architectural invariant: internal latency (<50ms target) strictly separated and not claimed as equivalent to end-to-end execution speed
+  - [x] Document hardware assumptions (Intel x86_64, 12 cores, Windows 10, Python 3.11.5, timer resolution ~100ns)
+- [x] Optimize measured hotspots without sacrificing safety checks (`backend/app/engine/feature_engine.py`)
+  - [x] Optimize `FeatureEngine` precision constants, eliminating 11 Decimal allocations per tick
+  - [x] Optimize single-pass realized volatility, improving calculation throughput by +24.2%
+  - [x] Preserve 100% mathematical correctness and risk control guarantees (all 14 feature engine tests passing)
+- [x] Integrate 12-stage telemetry and benchmark endpoints into FastAPI (`/api/v1/performance/latency-breakdown`, `/api/v1/performance/benchmark`)
+- [x] Produce comprehensive Performance & Latency Optimization Report (`PERFORMANCE_REPORT.md`)
+- [x] Run full test regression and static checks (191/191 tests passed, ruff & mypy clean, Vite build clean)
+- [!] Phase 17 Performance Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 

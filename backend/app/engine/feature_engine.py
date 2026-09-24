@@ -16,6 +16,11 @@ from app.models.contracts import (
     NormalizedMarketEvent,
 )
 
+_PREC_4 = Decimal("0.0001")
+_PREC_2 = Decimal("0.01")
+_ZERO = Decimal(0)
+_HUNDRED = Decimal(100)
+
 
 class FeatureEngine:
     """Deterministic, point-in-time technical and market feature computation engine."""
@@ -182,18 +187,18 @@ class FeatureEngine:
             symbol=symbol,
             timestamp=timestamp,
             bar_timeframe=self.bar_timeframe,
-            vwap=vwap.quantize(Decimal("0.0001")),
-            current_price=current_price.quantize(Decimal("0.0001")),
-            vwap_distance_pct=vwap_dist_pct.quantize(Decimal("0.0001")),
-            momentum_score=momentum_score.quantize(Decimal("0.0001")),
-            relative_volume_10=rvol_10.quantize(Decimal("0.0001")),
-            volume_acceleration=vol_accel.quantize(Decimal("0.0001")),
-            price_acceleration=price_accel.quantize(Decimal("0.0001")),
-            realized_volatility_15=realized_vol_15.quantize(Decimal("0.0001")),
-            spread_pct=spread_pct.quantize(Decimal("0.0001")),
-            liquidity_score=liquidity_score.quantize(Decimal("0.01")),
+            vwap=vwap.quantize(_PREC_4),
+            current_price=current_price.quantize(_PREC_4),
+            vwap_distance_pct=vwap_dist_pct.quantize(_PREC_4),
+            momentum_score=momentum_score.quantize(_PREC_4),
+            relative_volume_10=rvol_10.quantize(_PREC_4),
+            volume_acceleration=vol_accel.quantize(_PREC_4),
+            price_acceleration=price_accel.quantize(_PREC_4),
+            realized_volatility_15=realized_vol_15.quantize(_PREC_4),
+            spread_pct=spread_pct.quantize(_PREC_4),
+            liquidity_score=liquidity_score.quantize(_PREC_2),
             market_index_direction=market_index_direction,
-            sector_strength=sector_strength.quantize(Decimal("0.0001")),
+            sector_strength=sector_strength.quantize(_PREC_4),
             price_structure=price_structure,
             regime=regime,
         )
@@ -308,25 +313,30 @@ class FeatureEngine:
     ) -> Decimal:
         """Calculate sample standard deviation of bar percentage returns over rolling window."""
         if not history:
-            return Decimal(0)
+            return _ZERO
 
-        # Build prices sequence: history closes + current_price
-        recent_bars = history[-(window - 1) :] if window > 1 else []
-        prices = [b.close for b in recent_bars] + [current_price]
+        n_bars = min(window - 1, len(history))
+        if n_bars < 1:
+            return _ZERO
 
-        if len(prices) < 2:
-            return Decimal(0)
-
+        # Compute percentage returns in a single pass without allocating intermediate price lists
+        start_idx = len(history) - n_bars
         returns: list[float] = []
-        for i in range(1, len(prices)):
-            p_prev = float(prices[i - 1])
-            p_curr = float(prices[i])
-            if p_prev > 0:
-                returns.append(((p_curr - p_prev) / p_prev) * 100.0)
+        prev_f = float(history[start_idx].close)
+
+        for i in range(start_idx + 1, len(history)):
+            curr_f = float(history[i].close)
+            if prev_f > 0:
+                returns.append(((curr_f - prev_f) / prev_f) * 100.0)
+            prev_f = curr_f
+
+        p_curr_f = float(current_price)
+        if prev_f > 0:
+            returns.append(((p_curr_f - prev_f) / prev_f) * 100.0)
 
         n = len(returns)
         if n < 2:
-            return Decimal(0)
+            return _ZERO
 
         mean_ret = sum(returns) / n
         variance = sum((r - mean_ret) ** 2 for r in returns) / (n - 1)
@@ -371,8 +381,7 @@ class FeatureEngine:
 
         # Check for Breakout: current price above max high of last 10 bars with high volume
         lookback = min(10, len(history))
-        prev_highs = [b.high for b in history[-lookback:]]
-        max_prev_high = max(prev_highs)
+        max_prev_high = max(b.high for b in history[-lookback:])
 
         if current_price > max_prev_high and rvol_10 >= Decimal("1.2"):
             return "BREAKOUT"

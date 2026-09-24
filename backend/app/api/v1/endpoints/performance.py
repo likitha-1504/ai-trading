@@ -61,3 +61,34 @@ def get_execution_performance(
     perf_agg: PerformanceAggregator = Depends(get_performance_aggregator),
 ) -> dict[str, Any]:
     return perf_agg.get_execution_latency_metrics()
+
+
+@router.get(
+    "/latency-breakdown",
+    response_model=dict[str, Any],
+    summary="Get 12-stage pipeline latency metrics and distribution",
+    description="Returns microsecond-precision percentiles across all 12 pipeline stages with categorized fast-path vs AI council vs broker transit.",
+)
+def get_latency_breakdown() -> dict[str, Any]:
+    from app.performance.profiler import get_pipeline_profiler
+
+    profiler = get_pipeline_profiler()
+    return profiler.get_categorized_summary()
+
+
+@router.post(
+    "/benchmark",
+    response_model=dict[str, Any],
+    summary="Execute automated pipeline benchmark across all 12 stages",
+    description="Runs systematic microbenchmarks across all 12 stages and returns hardware assumptions and measured percentiles.",
+)
+def execute_pipeline_benchmark() -> dict[str, Any]:
+    from app.performance.benchmarks import PipelineBenchmarkHarness
+
+    harness = PipelineBenchmarkHarness()
+    metrics = harness.run_all_stages(fast_path_iterations=100, ai_iterations=5)
+    return {
+        "hardware": harness.hardware.to_dict(),
+        "summary": harness.profiler.get_categorized_summary(),
+        "stages": {name: m.to_dict() for name, m in metrics.items()},
+    }

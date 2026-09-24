@@ -113,6 +113,16 @@ class ModelLatencyStats(BaseModel):
     fallback_rate_pct: float
 
 
+class PipelineLatencyBreakdownResponse(BaseModel):
+    """Multi-stage latency breakdown across all 12 pipeline stages."""
+
+    disclaimer: str
+    fast_path_internal: dict[str, Any]
+    ai_council_inference: dict[str, Any]
+    broker_network: dict[str, Any]
+    all_stages: dict[str, Any]
+
+
 class RiskStatusResponse(BaseModel):
     """Real-time risk governance, limits, and circuit breaker metrics."""
 
