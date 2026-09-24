@@ -115,10 +115,10 @@ Status Key:
 ---
 
 ## Phase 10: Qwen3 Analyst Integration
-- [ ] Prepare Codex delegation spec for Qwen3 integration
-- [ ] Codex: Implement structured JSON schema, prompt templates, and timeout handlers
-- [ ] Antigravity: Verify AI output validation and fallback behavior
-- [!] Phase 10 Phase Gate Checkpoint
+- [x] Prepare Codex delegation spec for Qwen3 integration
+- [x] Codex: Implement structured JSON schema, prompt templates, and timeout handlers (`backend/app/ai/config.py`, `backend/app/ai/prompts.py`, `backend/app/ai/validator.py`, `backend/app/ai/metrics.py`, `backend/app/ai/client.py`)
+- [x] Antigravity: Verify AI output validation and fallback behavior (`backend/tests/test_qwen3_analyst.py`)
+- [!] Phase 10 Phase Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 

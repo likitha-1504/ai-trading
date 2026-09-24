@@ -176,3 +176,17 @@ This document tracks all critical architectural, design, and technical decisions
      - Stress-testing trading edge persistence across varying slippage tick increments (0, 1, 2, 3 ticks).
 - **Consequences**: Provably unbiased historical and real-time paper evaluation; identical strategy execution across simulation and production; complete auditability through TradeJournal; zero risk of capital loss or accidental live order execution.
 
+---
+
+## ADR-013: Qwen3 Primary Market Analyst Integration, Structured Qualitative Evidence, and Deterministic Fallback Gating
+- **Date**: 2026-09-24
+- **Status**: PENDING APPROVAL (Phase 10 Gate Checkpoint)
+- **Context**: Autonomous micro-trading requires qualitative analysis of pre-screened technical setups (catalyst identification, bullish evidence, market context, perceived risks, invalidation criteria) while ensuring LLM latency, probabilistic hallucinations, network timeouts, or malformed JSON payloads cannot destabilize the system or bypass risk controls.
+- **Decision**:
+  1. Restrict Qwen3 inputs strictly to structured feature summaries (`FeatureSnapshot`) and candidate context (`Candidate`), completely eliminating raw tick stream leakage into the LLM prompt context (`backend/app/ai/prompts.py`).
+  2. Define strict JSON schema with Pydantic contracts in `app.models.contracts.MarketThesis` and `MarketThesisAction` (`PROCEED`, `CAUTION`, `REJECT`), capturing thesis summary, catalyst, bullish evidence, invalidation conditions, perceived risks, bounded confidence score ([0.0, 1.0]), context summary, model metadata (`model_name`, `model_version`, `prompt_version`), latency in ms, and token metrics.
+  3. Implement `Qwen3OutputValidator` in `backend/app/ai/validator.py` with markdown codeblock fence stripping, JSON structure verification, bounds checking, and deterministic parsing.
+  4. Implement `Qwen3AnalystClient` in `backend/app/ai/client.py` supporting both asynchronous and synchronous invocation with per-request timeouts (default 3.0s), exponential backoff retries, and comprehensive error trapping.
+  5. Enforce deterministic safe fallbacks on model unavailability, timeouts, or malformed outputs via `create_fallback_thesis()`, assigning confidence score `0.0`, `CAUTION` action, and `is_fallback=True`, ensuring zero trade execution authority or risk bypass.
+  6. Collect runtime telemetry in `AIAnalystMetrics` (`backend/app/ai/metrics.py`) tracking request counts, successes, failures, timeouts, malformed responses, fallbacks, token counts, and average/P95 latencies.
+- **Consequences**: Qualitative AI reasoning is cleanly integrated into the evidence-gathering pipeline; zero risk of LLM hallucinations triggering orders or bypassing risk rules; complete resilience against Ollama/network downtime.

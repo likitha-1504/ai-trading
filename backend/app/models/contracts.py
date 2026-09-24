@@ -143,20 +143,31 @@ class AIModelRole(str, Enum):
     CHALLENGER = "CHALLENGER"  # DeepSeek-R1
 
 
+class MarketThesisAction(str, Enum):
+    PROCEED = "PROCEED"
+    CAUTION = "CAUTION"
+    REJECT = "REJECT"
+
+
 class MarketThesis(BaseModel):
     """Qwen3 Primary Analyst output schema."""
 
     candidate_id: str
     model_name: str = "qwen3:latest"
+    model_version: str = "v1.0"
+    prompt_version: str
     thesis_summary: str
     catalyst_identified: str | None = None
     bullish_evidence: list[str]
     invalidation_conditions: list[str]
     perceived_risks: list[str]
     confidence_score: Decimal = Field(ge=Decimal("0.0"), le=Decimal("1.0"))
-    suggested_action: str  # PROCEED / CAUTION / REJECT
+    context_summary: str | None = None
+    suggested_action: MarketThesisAction = MarketThesisAction.PROCEED
     latency_ms: int
-    prompt_version: str
+    token_count: int | None = None
+    is_fallback: bool = False
+    raw_response: str | None = None
 
 
 class ChallengerCritique(BaseModel):
