@@ -526,3 +526,261 @@ def test_deepseek_r1_zero_order_execution_authority():
     assert not hasattr(client, "execute_trade")
     assert not hasattr(client, "place_order")
     assert not hasattr(client, "cancel_order")
+
+
+def test_council_fallback_safety_gate():
+    """Verify deterministic gate blocks clearance when either AI model triggers fallback."""
+    candidate = make_test_candidate()
+    thesis = make_test_thesis()
+    critique = DeepSeekR1OutputValidator.validate_and_parse(
+        raw_output=json.dumps(
+            {
+                "critique_summary": "Clean thesis.",
+                "identified_vulnerabilities": [],
+                "contradictory_signals": [],
+                "worst_case_scenario": "Mild pullback",
+                "downside_severity": "LOW",
+                "recommendation_flag": "CONFIRM",
+            }
+        ),
+        candidate_id=candidate.candidate_id,
+        latency_ms=100,
+        model_name="deepseek-r1:latest",
+        model_version="v1.0",
+        prompt_version="deepseek-r1-challenger-v1.0.0",
+    )
+
+    # 1. Thesis fallback
+    fallback_thesis = MarketThesis(
+        candidate_id=candidate.candidate_id,
+        model_name="qwen3:latest",
+        model_version="v1.0",
+        prompt_version="qwen3-analyst-v1.0.0",
+        thesis_summary="Fallback thesis",
+        catalyst_identified="None",
+        bullish_evidence=[],
+        invalidation_conditions=[],
+        perceived_risks=["Model timeout"],
+        confidence_score=Decimal("0.0"),
+        context_summary="Fallback",
+        suggested_action=MarketThesisAction.CAUTION,
+        latency_ms=3000,
+        is_fallback=True,
+    )
+    v1 = evaluate_council_signals(candidate, fallback_thesis, critique)
+    assert v1.passed_filter is False
+    assert v1.action == MarketThesisAction.CAUTION
+    assert "AI Council fallback active" in v1.decision_reason
+
+    # 2. Critique fallback
+    fallback_critique = DeepSeekR1OutputValidator.create_fallback_critique(
+        candidate_id=candidate.candidate_id,
+        reason="Challenger timeout",
+        latency_ms=5000,
+        model_name="deepseek-r1:latest",
+        model_version="v1.0",
+        prompt_version="deepseek-r1-challenger-v1.0.0",
+    )
+    v2 = evaluate_council_signals(candidate, thesis, fallback_critique)
+    assert v2.passed_filter is False
+    assert v2.action == MarketThesisAction.CAUTION
+    assert "AI Council fallback active" in v2.decision_reason
+
+
+def test_council_qwen3_rejection_or_low_confidence():
+    """Verify deterministic gate immediately rejects when Qwen3 rejects or confidence is low."""
+    candidate = make_test_candidate()
+    critique = DeepSeekR1OutputValidator.validate_and_parse(
+        raw_output=json.dumps(
+            {
+                "critique_summary": "DeepSeek endorses setup.",
+                "identified_vulnerabilities": [],
+                "contradictory_signals": [],
+                "worst_case_scenario": "None",
+                "downside_severity": "LOW",
+                "recommendation_flag": "CONFIRM",
+            }
+        ),
+        candidate_id=candidate.candidate_id,
+        latency_ms=100,
+        model_name="deepseek-r1:latest",
+        model_version="v1.0",
+        prompt_version="deepseek-r1-challenger-v1.0.0",
+    )
+
+    # Qwen3 rejects
+    rej_thesis = make_test_thesis(action=MarketThesisAction.REJECT, confidence=Decimal("0.80"))
+    v_rej = evaluate_council_signals(candidate, rej_thesis, critique)
+    assert v_rej.passed_filter is False
+    assert v_rej.action == MarketThesisAction.REJECT
+    assert "Qwen3 thesis rejected candidate" in v_rej.decision_reason
+
+    # Qwen3 low confidence (0.45 < 0.60 threshold)
+    low_conf_thesis = make_test_thesis(action=MarketThesisAction.PROCEED, confidence=Decimal("0.45"))
+    v_low = evaluate_council_signals(candidate, low_conf_thesis, critique)
+    assert v_low.passed_filter is False
+    assert v_low.action == MarketThesisAction.REJECT
+    assert "below minimum hurdle" in v_low.decision_reason
+
+
+def test_council_empirical_liquidity_failure():
+    """Verify deterministic gate rejects contested candidate if liquidity score is deficient."""
+    # Liquidity score is 55.0 (< 70.0 hurdle)
+    candidate = make_test_candidate(spread_pct=Decimal("0.0008"), liquidity=Decimal("55.0"))
+    thesis = make_test_thesis(action=MarketThesisAction.PROCEED, confidence=Decimal("0.85"))
+    critique = DeepSeekR1OutputValidator.validate_and_parse(
+        raw_output=json.dumps(
+            {
+                "critique_summary": "Thin order book liquidity creates execution risk.",
+                "identified_vulnerabilities": ["Low depth"],
+                "contradictory_signals": [],
+                "worst_case_scenario": "High slippage fill",
+                "downside_severity": "MEDIUM",
+                "recommendation_flag": "CONTEST",
+            }
+        ),
+        candidate_id=candidate.candidate_id,
+        latency_ms=120,
+        model_name="deepseek-r1:latest",
+        model_version="v1.0",
+        prompt_version="deepseek-r1-challenger-v1.0.0",
+    )
+
+    verdict = evaluate_council_signals(candidate, thesis, critique)
+    assert verdict.passed_filter is False
+    assert verdict.action == MarketThesisAction.REJECT
+    assert "deficient liquidity score" in verdict.decision_reason
+
+
+def test_council_invalid_stop_orientation():
+    """Verify deterministic gate rejects contested candidate if stop price >= trigger price for BUY."""
+    candidate = make_test_candidate()
+    candidate.initial_stop_price = Decimal("3540.00")  # Invalid stop above trigger 3530.00
+    thesis = make_test_thesis(action=MarketThesisAction.PROCEED, confidence=Decimal("0.85"))
+    critique = DeepSeekR1OutputValidator.validate_and_parse(
+        raw_output=json.dumps(
+            {
+                "critique_summary": "Contesting setup for stop validity verification.",
+                "identified_vulnerabilities": ["Stop placement anomaly"],
+                "contradictory_signals": [],
+                "worst_case_scenario": "Immediate stop trigger",
+                "downside_severity": "MEDIUM",
+                "recommendation_flag": "CONTEST",
+            }
+        ),
+        candidate_id=candidate.candidate_id,
+        latency_ms=110,
+        model_name="deepseek-r1:latest",
+        model_version="v1.0",
+        prompt_version="deepseek-r1-challenger-v1.0.0",
+    )
+
+    verdict = evaluate_council_signals(candidate, thesis, critique)
+    assert verdict.passed_filter is False
+    assert verdict.action == MarketThesisAction.REJECT
+    assert "Invalid stop-loss orientation" in verdict.decision_reason
+
+
+def test_council_full_agreement_proceed():
+    """Verify deterministic gate approves trade with PROCEED when Qwen3 and DeepSeek-R1 fully agree."""
+    candidate = make_test_candidate()
+    thesis = make_test_thesis(action=MarketThesisAction.PROCEED, confidence=Decimal("0.88"))
+    critique = DeepSeekR1OutputValidator.validate_and_parse(
+        raw_output=json.dumps(
+            {
+                "critique_summary": "Robust momentum breakout with pristine volume confirmation.",
+                "identified_vulnerabilities": [],
+                "contradictory_signals": [],
+                "worst_case_scenario": "Minor intraday consolidation",
+                "downside_severity": "LOW",
+                "recommendation_flag": "CONFIRM",
+            }
+        ),
+        candidate_id=candidate.candidate_id,
+        latency_ms=110,
+        model_name="deepseek-r1:latest",
+        model_version="v1.0",
+        prompt_version="deepseek-r1-challenger-v1.0.0",
+    )
+
+    verdict = evaluate_council_signals(candidate, thesis, critique)
+    assert verdict.passed_filter is True
+    assert verdict.action == MarketThesisAction.PROCEED
+    assert "corroborated by DeepSeek-R1 stress test" in verdict.decision_reason
+    assert verdict.confidence == Decimal("0.88")
+
+
+@pytest.mark.asyncio
+async def test_client_connection_error_retries_and_fallback():
+    """Verify connection failure triggers retries and records failure metrics."""
+    candidate = make_test_candidate()
+    thesis = make_test_thesis()
+    call_count = 0
+
+    def mock_handler(request: httpx.Request) -> httpx.Response:
+        nonlocal call_count
+        call_count += 1
+        raise httpx.ConnectError("Ollama daemon unreachable")
+
+    transport = httpx.MockTransport(mock_handler)
+    async with httpx.AsyncClient(transport=transport) as async_http:
+        config = DeepSeekR1Config(timeout_seconds=0.5, max_retries=1, retry_backoff_seconds=0.01)
+        client = DeepSeekR1ChallengerClient(config=config, http_client=async_http)
+        critique = await client.critique_candidate(candidate, thesis)
+
+    assert call_count == 2  # 1 initial + 1 retry
+    assert critique.is_fallback is True
+    assert critique.recommendation_flag == ChallengerRecommendation.CONTEST
+    assert client.metrics.failed_requests == 1
+    assert client.metrics.fallback_count == 1
+
+
+def test_validator_missing_required_fields():
+    """Verify validator errors on missing required fields or non-dictionary JSON."""
+    # 1. Missing worst_case_scenario
+    payload1 = {
+        "critique_summary": "Missing worst case",
+        "identified_vulnerabilities": [],
+        "contradictory_signals": [],
+        "downside_severity": "LOW",
+        "recommendation_flag": "CONFIRM",
+    }
+    with pytest.raises(MalformedChallengerOutputError, match="worst_case_scenario"):
+        DeepSeekR1OutputValidator.validate_and_parse(
+            raw_output=json.dumps(payload1),
+            candidate_id="cand-err-1",
+            latency_ms=50,
+            model_name="deepseek-r1:latest",
+            model_version="v1.0",
+            prompt_version="deepseek-r1-challenger-v1.0.0",
+        )
+
+    # 2. Missing critique_summary
+    payload2 = {
+        "identified_vulnerabilities": [],
+        "contradictory_signals": [],
+        "worst_case_scenario": "Stop hit",
+        "downside_severity": "LOW",
+        "recommendation_flag": "CONFIRM",
+    }
+    with pytest.raises(MalformedChallengerOutputError, match="critique_summary"):
+        DeepSeekR1OutputValidator.validate_and_parse(
+            raw_output=json.dumps(payload2),
+            candidate_id="cand-err-2",
+            latency_ms=50,
+            model_name="deepseek-r1:latest",
+            model_version="v1.0",
+            prompt_version="deepseek-r1-challenger-v1.0.0",
+        )
+
+    # 3. Non-dictionary JSON (JSON array)
+    with pytest.raises(MalformedChallengerOutputError, match="not a dictionary"):
+        DeepSeekR1OutputValidator.validate_and_parse(
+            raw_output=json.dumps(["item1", "item2"]),
+            candidate_id="cand-err-3",
+            latency_ms=50,
+            model_name="deepseek-r1:latest",
+            model_version="v1.0",
+            prompt_version="deepseek-r1-challenger-v1.0.0",
+        )
+

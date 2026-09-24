@@ -209,4 +209,9 @@ This document tracks all critical architectural, design, and technical decisions
      - When Qwen3 is bullish (`PROCEED`) and DeepSeek-R1 contests (`CONTEST`), arbitrate using strictly empirical quantitative metrics (spread friction <= 15 bps, liquidity score >= 70.0, stop risk validation). Empirical compliance grants clearance with `CAUTION` and audited risk notes; empirical failure triggers immediate rejection.
      - Never use simple majority voting or probabilistic resolution.
 - **Consequences**: Rigorous adversarial stress-testing without introducing deadlock or probabilistic risk leakage; guaranteed supremacy of empirical math and deterministic safety rules.
+- **Verification Evidence**:
+  - 21 unit and integration tests passing in `backend/tests/test_deepseek_r1_challenger.py` covering prompt construction, think-tag stripping, JSON schema parsing, timeout retries, connection failure recovery, fallback generation, telemetry recording, broker execution lockout, and empirical council arbitration.
+  - Full project test suite passing (127/127 tests passing).
+  - Static type checking (mypy) and linting (ruff) passing with zero errors across all 68 source files.
+
 

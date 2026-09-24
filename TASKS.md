@@ -126,6 +126,12 @@ Status Key:
 - [x] Prepare Codex delegation spec for adversarial challenger
 - [x] Codex: Implement critique prompts, stress testing, and structured schema (`backend/app/ai/challenger_config.py`, `backend/app/ai/challenger_prompts.py`, `backend/app/ai/challenger_validator.py`, `backend/app/ai/challenger_client.py`)
 - [x] Antigravity: Verify deterministic gate retains final decision authority (`backend/app/ai/council_evaluator.py`, `backend/tests/test_deepseek_r1_challenger.py`)
+  - [x] Verify prompt builders isolate raw ticks and incorporate Qwen3 thesis + feature snapshot
+  - [x] Verify `<think>...</think>` chain-of-thought sanitization and strict Pydantic JSON parsing
+  - [x] Verify timeout, exponential backoff retries, connection error recovery, and safe fallback invariants
+  - [x] Verify deterministic dispute resolution (Qwen3 bullish vs DeepSeek-R1 contested/veto) with empirical math
+  - [x] Verify zero broker execution / order placement authority on AI clients
+  - [x] All 21 Phase 11 unit/integration tests passing (127 total suite passing, ruff & mypy clean)
 - [!] Phase 11 Phase Gate Checkpoint (Awaiting User Sign-off)
 
 ---
