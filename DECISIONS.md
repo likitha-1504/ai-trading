@@ -195,7 +195,7 @@ This document tracks all critical architectural, design, and technical decisions
 
 ## ADR-014: DeepSeek-R1 Adversarial Challenger Integration, Think-Tag Sanitization, and Deterministic Dispute Arbitration
 - **Date**: 2026-09-24
-- **Status**: PENDING APPROVAL (Phase 11 Gate Checkpoint)
+- **Status**: APPROVED (Phase 11 Gate Sign-Off)
 - **Context**: Relying on a single qualitative AI analyst (Qwen3) introduces susceptibility to confirmation bias, overlooked structural risks, and unexamined assumptions. Adding an adversarial challenger (DeepSeek-R1) provides critical stress-testing, but simple majority voting or probabilistic resolution must never decide trade authorization. The deterministic Trade Gate must retain ultimate authority.
 - **Decision**:
   1. Restrict DeepSeek-R1 inputs to structured candidate metrics (`FeatureSnapshot`, `Candidate`) AND Qwen3's qualitative analysis (`MarketThesis`), preserving complete isolation from raw tick streams (`backend/app/ai/challenger_prompts.py`).
@@ -213,5 +213,29 @@ This document tracks all critical architectural, design, and technical decisions
   - 21 unit and integration tests passing in `backend/tests/test_deepseek_r1_challenger.py` covering prompt construction, think-tag stripping, JSON schema parsing, timeout retries, connection failure recovery, fallback generation, telemetry recording, broker execution lockout, and empirical council arbitration.
   - Full project test suite passing (127/127 tests passing).
   - Static type checking (mypy) and linting (ruff) passing with zero errors across all 68 source files.
+
+---
+
+## ADR-015: Deterministic Trade Gate, 7-Step Decision Pipeline, and Autonomous Risk Ownership Transfer
+- **Date**: 2026-09-24
+- **Status**: PENDING APPROVAL (Phase 12 Gate Checkpoint)
+- **Context**: The AI Micro-Trading Agent requires a unified decision pipeline that evaluates candidate viability, portfolio risk, transaction friction, and qualitative AI analysis while strictly preserving deterministic supremacy. Crucially, AI models must be physically incapable of submitting broker orders, capital limits (₹100 baseline, ₹300 autonomy threshold) must be rigorously enforced, and active position risk must be autonomously transferred to the Independent Position Watcher.
+- **Decision**:
+  1. Implement `DeterministicTradeGate` in `backend/app/gate/trade_gate.py` executing a strict 7-step decision pipeline:
+     - **Step 1: Deterministic Candidate Gate**: Filters candidate setups on price rationality, stop orientation, spread tolerance (<= 15 bps), liquidity score (>= 70.0), and 15:15 IST intraday cutoff. Rejection halts pipeline immediately before invoking LLM inference.
+     - **Step 2: Risk / Capital / Cost Gate**: Leverages `RiskEngine`, `CapitalManager`, and `IndianMarketCostModel`. Enforces 3% daily drawdown circuit breaker, 2-position concentration cap, position sizing (1.5% equity risk budget), Indian statutory levies (STT, GST, exchange fees, SEBI, stamp duty, 1-tick slippage), and net-edge hurdle. Rejection halts pipeline before invoking LLM inference.
+     - **Step 3: Qwen3 Qualitative Analysis**: Asynchronously/synchronously queries Qwen3 for catalyst, evidence, and invalidation criteria.
+     - **Step 4: DeepSeek-R1 Adversarial Challenge**: Asynchronously/synchronously queries DeepSeek-R1 to stress-test the thesis, arbitrating disputes through deterministic mathematical rules (no majority voting).
+     - **Step 5: Deterministic Final TradePlan Synthesis**: Generates immutable `TradePlan` contract capturing all 13 items required by the PDF: instrument, side, quantity, entry context, expected edge, estimated costs, risk limits, stop/protection, invalidation, strategy, AI evidence references, decision reason, and approval mode.
+     - **Step 6: Execution Authorization**: Strictly isolates AI from broker adapters. Only `DeterministicTradeGate` may construct `OrderRequest` and dispatch to `ExecutionEngine`. Enforces `ApprovalMode.AUTONOMOUS` for trades <= ₹300 and `ApprovalMode.MANUAL_PENDING` for trades > ₹300.
+     - **Step 7: Position Watcher Ownership Transfer**: Active positions created upon order fill are registered immediately with `IndependentPositionWatcher`, transferring continuous risk surveillance (sub-50ms hard stops, trailing stops, stale data exits, 15:15 IST auto-square-off) away from decision modules.
+  2. Implement `TradeGateAuditLogger` in `backend/app/gate/audit_logger.py` providing an immutable structured audit log across all 7 pipeline transitions.
+  3. Expand `TradePlan`, `RiskLimits`, and `StopProtection` contracts in `backend/app/models/contracts.py` with bidirectional field synchronization and validation.
+- **Consequences**: Provable deterministic execution guardrails; zero order injection vulnerability from LLMs; complete separation of concerns between strategy generation, qualitative AI stress-testing, trade planning, execution, and position risk ownership; transparent audit trail for every setup.
+- **Verification Evidence**:
+  - 14 dedicated unit/integration tests in `backend/tests/test_deterministic_trade_gate.py` passing.
+  - Complete project test suite passing (141/141 tests passing).
+  - Static type checking (`mypy backend`) and linting (`ruff check backend`) passing with zero errors across all 73 source files.
+
 
 

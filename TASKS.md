@@ -132,15 +132,22 @@ Status Key:
   - [x] Verify deterministic dispute resolution (Qwen3 bullish vs DeepSeek-R1 contested/veto) with empirical math
   - [x] Verify zero broker execution / order placement authority on AI clients
   - [x] All 21 Phase 11 unit/integration tests passing (127 total suite passing, ruff & mypy clean)
-- [!] Phase 11 Phase Gate Checkpoint (Awaiting User Sign-off)
+- [x] Phase 11 Phase Gate Checkpoint (APPROVED)
 
 ---
 
 ## Phase 12: Deterministic Trade Gate + AI Council
-- [ ] Prepare Codex delegation spec for Trade Gate pipeline
-- [ ] Codex: Assemble Candidate -> AI Council -> Risk Gate -> TradePlan pipeline
-- [ ] Antigravity: Verify that AI models cannot directly trigger order submissions
-- [!] Phase 12 Phase Gate Checkpoint
+- [x] Prepare Codex delegation spec for Trade Gate pipeline
+- [x] Codex: Assemble Candidate -> AI Council -> Risk Gate -> TradePlan pipeline (`backend/app/gate/config.py`, `backend/app/gate/audit_logger.py`, `backend/app/gate/trade_gate.py`)
+- [x] Antigravity: Verify that AI models cannot directly trigger order submissions (`backend/tests/test_deterministic_trade_gate.py`)
+  - [x] Verify Candidate Gate rejects invalid prices, stops, spreads (> 15 bps), liquidity (< 70), and cutoffs (15:15 IST) without calling AI
+  - [x] Verify Risk Gate enforces drawdown circuit breaker, position limits, sizing, Indian friction, and net edge hurdle without calling AI
+  - [x] Verify AI Council resolves Qwen3 and DeepSeek-R1 outputs deterministically
+  - [x] Verify TradePlan synthesizes all 13 items from PDF specification
+  - [x] Verify execution authorization (autonomous <= ₹300, manual pending > ₹300) and Position Watcher ownership transfer
+  - [x] Verify AI models have zero order submission authority
+  - [x] All 14 Phase 12 tests passing (141 total suite passing, ruff & mypy clean)
+- [!] Phase 12 Phase Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 
