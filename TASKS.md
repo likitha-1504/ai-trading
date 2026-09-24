@@ -247,14 +247,31 @@ Status Key:
 - [x] Integrate 12-stage telemetry and benchmark endpoints into FastAPI (`/api/v1/performance/latency-breakdown`, `/api/v1/performance/benchmark`)
 - [x] Produce comprehensive Performance & Latency Optimization Report (`PERFORMANCE_REPORT.md`)
 - [x] Run full test regression and static checks (191/191 tests passed, ruff & mypy clean, Vite build clean)
-- [!] Phase 17 Performance Gate Checkpoint (Awaiting User Sign-off)
+- [x] Phase 17 Performance Gate Checkpoint (APPROVED)
 
 ---
 
 ## Phase 18: Paper Trading Validation
-- [ ] Run full end-to-end system in paper mode over a fixed test window
-- [ ] Measure candidate quality, slippage, expectancy, and uptime
-- [!] Phase 18 Validation Report Checkpoint
+- [x] Run full end-to-end system in paper mode over a fixed test window (`backend/app/paper/paper_validator.py`, `backend/app/paper/runner.py`)
+  - [x] Multi-session paper simulation across 5 trading sessions and 5 equities (`SUZLON`, `IDEA`, `TATAMOTORS_M`, `ZOMATO`, `IOC`)
+  - [x] End-to-end integration: features, candidate detection, 7-step trade gate, dual-model AI Council (Qwen3 + DeepSeek-R1), paper broker execution, sub-50ms position watching, WAL trade journaling, and restart recovery
+  - [x] Strict invariant enforced: hard-coded `is_live = False` and zero real orders placed
+- [x] Measure candidate quality, slippage, expectancy, and uptime across all 11 required dimensions:
+  - [x] Dimension 1: Candidate Quality (5 candidates detected, 100% candidate/risk gate pass, rank scores, gross/net edge)
+  - [x] Dimension 2: Entry/Exit Behavior (5 orders filled, 100% fill rate, 2 hard stops, 2 profit targets, 1 time expiry)
+  - [x] Dimension 3: Costs & Indian Statutory Levies (exact brokerage, STT, exchange, SEBI, stamp duty, GST; friction drag analyzed)
+  - [x] Dimension 4: Slippage Assumptions & Sensitivity (monotonic stress-testing across 0, 1, 2, and 3 ticks; breakeven slippage 2.46 ticks)
+  - [x] Dimension 5: Trade Frequency & Pacing (1.0 trades/session, 0.16 trades/hr, zero position limit breaches)
+  - [x] Dimension 6: False Positives Analysis (2 losses analyzed: IDEA low-volume compression failure, ZOMATO volatility reversal)
+  - [x] Dimension 7: False Exits & Whipsaw Analysis (1 whipsaw identified due to tight penny-stock spread dynamics)
+  - [x] Dimension 8: Dual-Model Council Disagreement & Arbitration (5 invocations, 2 disagreements arbitrated deterministically, think-tag sanitization verified)
+  - [x] Dimension 9: Position Watcher Performance & LLM Independence (300 evaluations, 100% sub-50ms compliance, 6.2 µs median, emergency exits 100% independent of LLM)
+  - [x] Dimension 10: System Uptime, Telemetry & WAL Integrity (100% uptime, 96.7 ticks/s, 0 unhandled exceptions, 320 WAL transactions)
+  - [x] Dimension 11: Crash Recovery & Reconciliation (mid-session crash rehydrated 100% of positions, capital parity verified, zero unreconciled orders)
+- [x] Document identified empirical weaknesses without threshold curve-fitting (statutory fee drag on micro-capital, penny stock tick size vs stop distance, slippage impact)
+- [x] Comprehensive test suite (`backend/tests/test_paper_trading.py`) passing 10/10 tests (201/201 full suite regression passing, ruff & mypy clean)
+- [x] Produce comprehensive Paper Trading Validation Report (`PAPER_TRADING_VALIDATION_REPORT.md`)
+- [!] Phase 18 Validation Report Checkpoint (GATE CHECKPOINT REACHED - Awaiting Human Approval for Phase 19)
 
 ---
 

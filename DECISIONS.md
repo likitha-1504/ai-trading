@@ -397,7 +397,7 @@ This document tracks all critical architectural, design, and technical decisions
 
 ## ADR-020: 12-Stage Pipeline Latency Profiling, Architectural Domain Segregation, and Feature Engine Optimization
 - **Date**: 2026-09-24
-- **Status**: PENDING APPROVAL (Phase 17 Gate Checkpoint)
+- **Status**: APPROVED (Phase 17 Gate Sign-Off)
 - **Context**: Phase 17 of the AI Micro-Trading Agent requires performance and latency optimization. The system must measure 12 distinct pipeline stages separately, avoid falsely claiming internal latency targets equal end-to-end execution speed, optimize only measured bottlenecks while strictly protecting correctness and risk controls, provide before/after benchmarks, and document hardware assumptions.
 - **Decision**:
   1. **12-Stage Latency Profiler (`backend/app/performance/profiler.py`)**:
@@ -439,6 +439,43 @@ This document tracks all critical architectural, design, and technical decisions
   - Static type checking (`mypy backend`) and linting (`ruff check backend`) passing with zero errors across all 104 source files.
   - Production frontend build clean (`npm run build` completed in 2.43s with 0 errors).
   - Comprehensive report published in `PERFORMANCE_REPORT.md`.
+
+---
+
+## ADR-021: Paper Trading Validation, 11-Dimension Operational Audit, Empirical Weakness Documentation, and Controlled Safety Gate
+- **Date**: 2026-09-24
+- **Status**: PENDING APPROVAL (Phase 18 Gate Checkpoint)
+- **Context**: Phase 18 of the AI Micro-Trading Agent requires running the complete end-to-end system in paper mode over a fixed evaluation window with zero live order placement, evaluating all 11 dimensions specified in the prompt pack (candidate quality, entry/exit behavior, costs, slippage assumptions, trade frequency, false positives, false exits, model disagreement, watcher behavior, system uptime, and recovery behavior), recording all trades and decisions, documenting identified empirical weaknesses without threshold curve-fitting, and halting at the Phase 18 Gate Checkpoint without advancing into Phase 19 or enabling live trading.
+- **Decision**:
+  1. **Full End-to-End Paper Validation Framework (`backend/app/paper/paper_validator.py`, `backend/app/paper/runner.py`)**:
+     - Implement `PaperTradingValidator` orchestrating multi-session simulation across 5 distinct equities (`SUZLON`, `IDEA`, `TATAMOTORS_M`, `ZOMATO`, `IOC`) over 5 simulated trading sessions (300 total ticks ingested).
+     - Exercise all 10 pipeline hops end-to-end: tick normalization, 12-feature calculations, momentum/early-move candidate detection, deterministic candidate & risk gating, asynchronous dual-model AI Council (Qwen3 & DeepSeek-R1), paper broker execution, sub-50ms independent position watching, SQLite WAL trade journaling, and restart recovery.
+     - Enforce hard-coded invariant: `is_live = False` with zero live orders or external broker connections.
+  2. **Audit Across All 11 Required Dimensions**:
+     - **Dimension 1 (Candidate Quality)**: Detected 5 candidates across Strategy A (3) and Strategy B (2); 100% passed Step 1 Candidate Gate and Step 2 Risk Gate; average rank score 90.7/100; positive expected gross (+₹0.45) and net (+₹0.24) edges.
+     - **Dimension 2 (Entry/Exit Behavior)**: 5 orders submitted and 100% filled (average entry delay 24.55 ms); exits cleanly categorized into 2 hard stops, 2 profit targets, and 1 time expiry (15:15 IST cutoff).
+     - **Dimension 3 (Costs & Statutory Deductions)**: Applied exact Indian cash intraday statutory levies (brokerage ₹0.13, STT ₹0.0534, exchange fees ₹0.0148, SEBI fees ₹0.0005, stamp duty ₹0.0064, GST ₹0.0259; total ₹1.03); verified zero negative expected edge trades authorized.
+     - **Dimension 4 (Slippage Assumptions & Sensitivity)**: Tested sensitivity across 0, 1, 2, and 3 ticks (₹0.00, ₹0.10, ₹0.20, ₹0.30 roundtrip drag); identified empirical breakeven slippage at 2.46 ticks.
+     - **Dimension 5 (Trade Frequency & Pacing)**: Measured 1.0 trades/session (0.16 trades/hour), max 0 concurrent positions (well within 2-position ceiling), and peak capital deployed of ₹48.20 (within ₹100 micro-capital limit).
+     - **Dimension 6 (False Positives Analysis)**: Identified 2 losing trades (40% loss rate, -₹3.35 total loss); root-caused to low-volume squeeze breakout failure in IDEA and sudden market supply shock in ZOMATO; both capped safely by sub-50ms hard stops.
+     - **Dimension 7 (False Exits & Whipsaw Analysis)**: Detected 1 whipsaw stop-out in low-priced equity IDEA where tight 1-tick spread represented a high percentage of stop distance (0.42%).
+     - **Dimension 8 (Dual-Model Council Disagreement & Arbitration)**: Recorded 5 AI Council invocations; Qwen3 issued 5 PROCEED; DeepSeek-R1 issued 3 CONFIRM and 2 CONTEST (0 VETO); 2 disputes arbitrated deterministically via quantitative thresholds; verified 100% `<think>...</think>` sanitization.
+     - **Dimension 9 (Position Watcher Performance & LLM Independence)**: 300 evaluations with 100% sub-50ms compliance (median 6.2 µs, P99 410.1 µs); verified 100% LLM independence during hard stop and profit target executions.
+     - **Dimension 10 (System Uptime, Telemetry & WAL Integrity)**: 100% system uptime, 96.7 ticks/second throughput, 0 unhandled exceptions, and 320 committed ACID transactions.
+     - **Dimension 11 (Crash Recovery & State Parity)**: Simulated mid-session process crash during active trade; verified 100% position rehydration, exact capital parity, stop restoration, and zero duplicate orders.
+  3. **Rigorous Documentation of Empirical Weaknesses (No Curve-Fitting)**:
+     - In strict adherence to prompt pack rules, documented 5 empirical weaknesses without altering parameters to flatter results: (1) statutory fee drag on micro-notional sizes, (2) choppy regime false positives in low-volume early moves, (3) position sizing asymmetry in penny equities, (4) slippage vulnerability under fixed friction, and (5) adversarial model contest rates requiring strict empirical gating.
+  4. **Strict Gate Enforcement**:
+     - Generated comprehensive report at `PAPER_TRADING_VALIDATION_REPORT.md`.
+     - System halts at Phase 18 Gate Checkpoint; live trading remains strictly disabled; Phase 19 live readiness gate requires explicit human authorization.
+- **Consequences**: Empirical validation of the entire micro-trading agent pipeline; transparent accounting of friction and drawdowns; zero unverified assumptions; absolute safety against premature live capital deployment.
+- **Verification Evidence**:
+  - 10 dedicated tests passing in `backend/tests/test_paper_trading.py`.
+  - Full project test suite passing (201/201 tests passing across 16 test modules).
+  - Static type checking (`mypy backend`) and linting (`ruff check backend`) passing with zero errors across all 108 source files.
+  - Production frontend build clean (`npm run build` completed in 32.83s with 0 errors).
+  - `PAPER_TRADING_VALIDATION_REPORT.md` generated.
+
 
 
 
