@@ -147,15 +147,23 @@ Status Key:
   - [x] Verify execution authorization (autonomous <= ₹300, manual pending > ₹300) and Position Watcher ownership transfer
   - [x] Verify AI models have zero order submission authority
   - [x] All 14 Phase 12 tests passing (141 total suite passing, ruff & mypy clean)
-- [!] Phase 12 Phase Gate Checkpoint (Awaiting User Sign-off)
+- [x] Phase 12 Phase Gate Checkpoint (APPROVED)
 
 ---
 
 ## Phase 13: Database, Journal & Performance
-- [ ] Prepare Codex delegation spec for SQLite WAL schema and journaling
-- [ ] Codex: Implement persistence, audit trails, and restart recovery
-- [ ] Antigravity: Verify ACID compliance and decision reproducibility
-- [!] Phase 13 Phase Gate Checkpoint
+- [x] Prepare Codex delegation spec for SQLite WAL schema and journaling
+- [x] Codex: Implement persistence, audit trails, and restart recovery (`backend/app/db/schema.py`, `backend/app/db/connection.py`, `backend/app/db/repository.py`, `backend/app/db/journal.py`, `backend/app/db/performance.py`, `backend/app/db/audit.py`, `backend/app/db/recovery.py`, `backend/app/db/__init__.py`)
+- [x] Antigravity: Verify ACID compliance, safe transactions, and decision reproducibility (`backend/tests/test_database_journal_performance.py`)
+  - [x] Finalize SQLite schema with WAL mode (`PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;`)
+  - [x] Implement all 13 core entities: `capital_state`, `positions`, `orders`, `trades`, `candidates`, `features`, `ai_analyses`, `trade_plans`, `risk_events`, `strategy_versions`, `model_calls`, `execution_metrics`, `system_events`
+  - [x] Implement persistent trade journal with entry/exit tracking and accurate P/L calculations (Gross, Indian statutory friction, Net)
+  - [x] Implement performance metrics aggregation (win rate, profit factor, expectancy, max drawdown) and strategy-level stratification (`MOMENTUM_CONTINUATION` vs `EARLY_MOVE_DETECTION`)
+  - [x] Implement model latency metrics (avg, p95, fallback rates for Qwen3 and DeepSeek-R1) and execution latency metrics (submission, ACK, fill, slippage)
+  - [x] Implement decision audit trail reconstruction ensuring full decision reproducibility (`is_fully_reproducible`)
+  - [x] Implement crash/restart recovery rehydrating `IndependentPositionWatcher`, `CapitalManager`, and `ExecutionEngine` from persistent database state
+  - [x] All 8 Phase 13 unit/integration tests passing (149 total test suite passing, ruff & mypy clean)
+- [!] Phase 13 Phase Gate Checkpoint (Awaiting User Sign-off)
 
 ---
 

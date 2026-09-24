@@ -218,7 +218,7 @@ This document tracks all critical architectural, design, and technical decisions
 
 ## ADR-015: Deterministic Trade Gate, 7-Step Decision Pipeline, and Autonomous Risk Ownership Transfer
 - **Date**: 2026-09-24
-- **Status**: PENDING APPROVAL (Phase 12 Gate Checkpoint)
+- **Status**: APPROVED (Phase 12 Gate Sign-Off)
 - **Context**: The AI Micro-Trading Agent requires a unified decision pipeline that evaluates candidate viability, portfolio risk, transaction friction, and qualitative AI analysis while strictly preserving deterministic supremacy. Crucially, AI models must be physically incapable of submitting broker orders, capital limits (₹100 baseline, ₹300 autonomy threshold) must be rigorously enforced, and active position risk must be autonomously transferred to the Independent Position Watcher.
 - **Decision**:
   1. Implement `DeterministicTradeGate` in `backend/app/gate/trade_gate.py` executing a strict 7-step decision pipeline:
@@ -236,6 +236,40 @@ This document tracks all critical architectural, design, and technical decisions
   - 14 dedicated unit/integration tests in `backend/tests/test_deterministic_trade_gate.py` passing.
   - Complete project test suite passing (141/141 tests passing).
   - Static type checking (`mypy backend`) and linting (`ruff check backend`) passing with zero errors across all 73 source files.
+
+---
+
+## ADR-016: SQLite WAL Schema, Persistent Trade Journal, Performance Analytics, and Restart Recovery
+- **Date**: 2026-09-24
+- **Status**: PENDING APPROVAL (Phase 13 Gate Checkpoint)
+- **Context**: Phase 13 of the AI Micro-Trading Agent requires a persistent SQLite database with Write-Ahead Logging (WAL) and safe transaction handling to persist all 13 core architectural entities, record executed trade lifecycle journals, compute accurate statutory P/L, aggregate strategy/model/execution performance metrics, provide an auditable decision reconstruction trail (`is_fully_reproducible`), and enable clean restart recovery for system controllers without state corruption.
+- **Decision**:
+  1. **SQLite WAL & Connection Management (`backend/app/db/schema.py`, `backend/app/db/connection.py`, `backend/app/db/session.py`)**:
+     - Configure SQLite with `PRAGMA journal_mode = WAL;`, `PRAGMA synchronous = NORMAL;`, `PRAGMA foreign_keys = ON;`, and `PRAGMA busy_timeout = 5000;`.
+     - Implement both synchronous (`get_connection`) and asynchronous (`get_async_connection`) context managers with automatic commit on success and automatic rollback on unhandled exceptions.
+  2. **13 Core Entities DDL & Repository (`backend/app/db/repository.py`)**:
+     - Implement DDL schema and CRUD repository functions for all 13 core entities: `capital_state`, `positions`, `orders`, `trades`, `candidates`, `features`, `ai_analyses`, `trade_plans`, `risk_events`, `strategy_versions`, `model_calls`, `execution_metrics`, and `system_events`.
+     - Create database indices across candidate IDs, symbols, statuses, and timestamps for high-frequency queries.
+  3. **Persistent Trade Journal (`backend/app/db/journal.py`)**:
+     - Implement `DatabaseTradeJournal` tracking position entries and exits with precise P/L accounting (Gross P/L, Indian statutory cost breakdown via `FrictionBreakdown`, and Net P/L).
+  4. **Performance Aggregator (`backend/app/db/performance.py`)**:
+     - Implement `PerformanceAggregator` computing financial KPIs: total trades, win rate, gross/net P/L, profit factor, expectancy, average win/loss, maximum drawdown, and trade frequency.
+     - Implement strategy-level metrics stratification (`MOMENTUM_CONTINUATION` vs `EARLY_MOVE_DETECTION`).
+     - Implement model latency metrics (`qwen3:latest` and `deepseek-r1:latest` average latency, P95 latency, call count, and fallback rate).
+     - Implement execution latency metrics (average submission latency, average fill latency, fill rate percentage, and total slippage).
+  5. **Decision Audit Trail & Reproducibility (`backend/app/db/audit.py`)**:
+     - Implement `DecisionAuditTrailManager` linking candidate setups, quantitative feature snapshots, qualitative AI analyses (Qwen3 & DeepSeek-R1), synthesized trade plans, submitted orders, and resulting position/trade records.
+     - Provide `is_fully_reproducible` audit verification checking that every execution has full upstream provenance.
+  6. **Restart Recovery (`backend/app/db/recovery.py`)**:
+     - Implement `RestartRecoveryManager` that rehydrates active state after process crash or restart:
+       - Restores `IndependentPositionWatcher` with open positions, hard stops, trailing stops, and profit targets.
+       - Restores `CapitalManager` with total equity, available capital, realized P/L, and high-water mark.
+       - Restores `ExecutionEngine` with pending/active orders.
+- **Consequences**: Complete persistence of all system facts and analytical telemetry; guaranteed ACID transaction safety; comprehensive decision reproducibility for audit compliance; seamless crash recovery without state loss.
+- **Verification Evidence**:
+  - 8 comprehensive unit and integration tests passing in `backend/tests/test_database_journal_performance.py`.
+  - Full project test suite passing (149/149 tests passing).
+  - Static type checking (`mypy backend`) and linting (`ruff check backend`) passing with zero errors across all 81 source files.
 
 
 
