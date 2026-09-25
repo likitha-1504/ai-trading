@@ -343,14 +343,49 @@ Status Key:
   - [x] `GET /api/v1/autonomous/report`
 - [x] Comprehensive test suite (`backend/tests/test_autonomous_mode.py`) passing 12/12 tests (233/233 full suite regression passing, ruff & mypy clean, Vite build clean)
 - [x] Produce comprehensive Phase 21 Evaluation Report (`AUTONOMOUS_MODE_REPORT.md`)
-- [!] Phase 21 Gate Checkpoint: ₹300 Autonomous Mode Sign-Off (MANDATORY GATE CHECKPOINT REACHED - System strictly halted awaiting explicit operator sign-off before entering Phase 22)
+- [x] Phase 21 Gate Checkpoint: ₹300 Autonomous Mode Sign-Off (APPROVED by User for Phase 22 Continuation)
 
 ---
 
 ## Phase 22: Learning & Continuous Improvement
-- [ ] Implement post-trade analytics and versioned strategy improvement loop
-- [ ] Enforce immutability of live strategy rules without prior paper validation
-- [!] Phase 22 Sign-Off
+- [x] Design controlled learning loop without allowing uncontrolled self-modification (`backend/app/learning/learning_loop.py`, `backend/app/learning/models.py`)
+  - [x] Invariant 1: Prohibit silent or automatic self-modification; raise `UncontrolledModificationError` on unauthorized rewrite attempts
+  - [x] Invariant 2: The system may recommend changes; it must not silently rewrite live trading rules
+  - [x] Invariant 3: Any strategy, model, or prompt change must create a distinct semantic version in SQLite `strategy_versions`
+  - [x] Invariant 4: Require mandatory backtest + out-of-sample paper validation before production promotion
+  - [x] Invariant 5: Production deployment strictly gated behind verified cryptographic human operator authorization token (`settings.LIVE_TRADING_APPROVAL_TOKEN`)
+- [x] Implement comprehensive Post-Trade Analytics Engine evaluating historical trade data across all 8 mandatory dimensions (`backend/app/learning/analytics.py`):
+  - [x] Dimension 1: Strategy Performance (trades, win rate, gross/net P&L, profit factor, expectancy, max drawdown, friction drag %)
+  - [x] Dimension 2: Regime Performance (stratification across Bullish Trending, Bearish Trending, High Volatility Chop, Low Volatility Compression)
+  - [x] Dimension 3: Feature Usefulness (correlation with net P&L, winner/loser means, separation score, and signal grading: RVOL, spread %, momentum ROC, volume acceleration, price acceleration, realized volatility, liquidity score)
+  - [x] Dimension 4: False Positives (root-cause classification: penny stock spread erosion, momentum stall, chop whipsaw, slippage excess, adverse reversal, with targeted remediations)
+  - [x] Dimension 5: False Exits (exit trigger efficiency: take profit, hard stop, time expiry, premature exits, whipsaw shakeouts, and MFE capture %)
+  - [x] Dimension 6: AI Reasoning Quality (Qwen3 analyst and DeepSeek-R1 challenger call counts, fallback rates, latency, high/moderate confidence win rates, dispute arbitration accuracy, unanimous vs contested win rates)
+  - [x] Dimension 7: Execution Quality (fill rates, submission ACK latency, fill latency, slippage distribution: zero, adverse, favorable, and total slippage drag)
+  - [x] Dimension 8: Cost Leakage (statutory friction breakdown: brokerage, STT, exchange, SEBI, stamp duty, GST; friction drag ratio %, micro-capital fee sensitivity at ₹100, ₹300, and ₹1000, and min profitable move in bps)
+- [x] Multi-Stage Gated Strategy Improvement Loop (`ControlledLearningLoop`):
+  - [x] Proposal Generation: formulated `StrategyImprovementProposal` recommendations with typed `ParameterChange` entries in `PROPOSED` status
+  - [x] Stage 1 Backtest Gate: quantitative hurdle enforcement (Profit Factor >= 1.20, Win Rate >= 45.0%, Max DD <= 5.0%, Net P&L > 0)
+  - [x] Stage 2 Out-of-Sample Paper Gate: operational hurdle enforcement (0 risk invariant breaches, 100% sub-50ms position watcher SLA compliance)
+  - [x] Stage 3 Operator Token Gate: cryptographic human operator authorization token required for production promotion
+  - [x] Operator Rejection Gate: mandatory documented rationale (min 5 characters) for proposal rejection
+- [x] SQLite WAL Persistence & Schema Migration:
+  - [x] Added `strategy_proposals` table and performance indices in `backend/app/db/schema.py`
+  - [x] Added repository CRUD methods in `backend/app/db/repository.py` (`save_strategy_proposal`, `get_strategy_proposal`, `get_all_strategy_proposals`, `get_all_strategy_versions`)
+- [x] FastAPI Control Plane Endpoints (`backend/app/api/v1/endpoints/learning.py`, `backend/app/api/schemas.py`, `backend/app/api/v1/router.py`) and Frontend Service Bindings (`frontend/src/services/api.ts`):
+  - [x] `GET /api/v1/learning/analytics`
+  - [x] `GET /api/v1/learning/proposals`
+  - [x] `GET /api/v1/learning/proposals/{proposal_id}`
+  - [x] `POST /api/v1/learning/proposals/generate`
+  - [x] `POST /api/v1/learning/proposals/{proposal_id}/validate-backtest`
+  - [x] `POST /api/v1/learning/proposals/{proposal_id}/validate-paper`
+  - [x] `POST /api/v1/learning/proposals/{proposal_id}/promote`
+  - [x] `POST /api/v1/learning/proposals/{proposal_id}/reject`
+  - [x] `GET /api/v1/learning/versions`
+  - [x] `GET /api/v1/learning/report`
+- [x] Comprehensive test suite (`backend/tests/test_learning_loop.py`) passing 8/8 tests (241/241 full repository test regression passing, ruff clean, mypy clean, Vite build clean)
+- [x] Orchestration runner (`backend/app/learning/runner.py`) consolidating multi-phase trade history and generating formal report (`LEARNING_IMPROVEMENT_REPORT.md`)
+- [!] Phase 22 Gate Checkpoint: Learning & Continuous Improvement Sign-Off (MANDATORY GATE CHECKPOINT REACHED - System strictly halted awaiting explicit operator sign-off before entering Phase 23)
 
 ---
 

@@ -235,6 +235,25 @@ CREATE TABLE IF NOT EXISTS system_events (
     metadata JSON
 );
 
+-- 14. Strategy Proposals (Phase 22 Learning & Continuous Improvement)
+CREATE TABLE IF NOT EXISTS strategy_proposals (
+    id TEXT PRIMARY KEY,
+    strategy_name TEXT NOT NULL,
+    target_version TEXT NOT NULL,
+    current_version TEXT NOT NULL,
+    status TEXT NOT NULL,
+    title TEXT NOT NULL,
+    empirical_weakness TEXT NOT NULL,
+    parameter_changes JSON NOT NULL,
+    backtest_evidence JSON,
+    paper_evidence JSON,
+    approved_by TEXT,
+    approval_token_masked TEXT,
+    approved_at TEXT,
+    rejection_reason TEXT,
+    created_at TEXT NOT NULL
+);
+
 -- Indices for performance and query optimization
 CREATE INDEX IF NOT EXISTS idx_positions_status ON positions(status);
 CREATE INDEX IF NOT EXISTS idx_positions_symbol ON positions(symbol);
@@ -249,4 +268,6 @@ CREATE INDEX IF NOT EXISTS idx_features_symbol_ts ON features(symbol, timestamp)
 CREATE INDEX IF NOT EXISTS idx_ai_analyses_candidate ON ai_analyses(candidate_id);
 CREATE INDEX IF NOT EXISTS idx_trade_plans_candidate ON trade_plans(candidate_id);
 CREATE INDEX IF NOT EXISTS idx_model_calls_model_ts ON model_calls(model_name, timestamp);
+CREATE INDEX IF NOT EXISTS idx_proposals_status ON strategy_proposals(status);
+CREATE INDEX IF NOT EXISTS idx_proposals_strat ON strategy_proposals(strategy_name);
 """

@@ -567,9 +567,9 @@ This document tracks all critical architectural, design, and technical decisions
 
 ---
 
-## ADR-021: Phase 21 — ₹300 Autonomous Mode Implementation, Multi-Tier Risk Invariant Preservation, and Human Approval Gating
+## ADR-024: Phase 21 — ₹300 Autonomous Mode Implementation, Multi-Tier Risk Invariant Preservation, and Human Approval Gating
 
-- **Status**: ACCEPTED (Phase 21 Implementation Complete; Halted at Phase 21 Gate Checkpoint)
+- **Status**: APPROVED (Phase 21 Complete; Approved by User for Phase 22 Continuation)
 - **Date**: 2026-09-25
 - **Context**: The Phase-Wise Prompt Pack (Page 25) mandates strict rules for entering and operating ₹300 Autonomous Mode:
   1. *Only enter this phase after documented validation and human approval.*
@@ -613,6 +613,57 @@ This document tracks all critical architectural, design, and technical decisions
   - Linting clean (`ruff check .` passing with 0 errors).
   - Production frontend build clean (`npm run build` completed in 1.97s with 0 errors).
   - Evaluation report generated (`AUTONOMOUS_MODE_REPORT.md`).
+
+---
+
+## ADR-025: Phase 22 — Controlled Learning Loop, 8-Dimension Post-Trade Analytics, Versioned Strategy Improvement, and Anti-Self-Modification Governance
+
+- **Status**: ACCEPTED (Phase 22 Implementation Complete; Halted at Phase 22 Gate Checkpoint)
+- **Date**: 2026-09-25
+- **Context**: The Phase-Wise Prompt Pack (Page 26) mandates strict rules for Phase 22 Learning & Continuous Improvement:
+  1. *Design the learning loop without allowing uncontrolled self-modification.*
+  2. *Use historical trade data to analyze: strategy performance, regime performance, feature usefulness, false positives, false exits, AI reasoning quality, execution quality, and cost leakage.*
+  3. *Any strategy/model/prompt change must create a new version.*
+  4. *Require backtest + out-of-sample/paper validation before production use.*
+  5. *The system may recommend changes; it must not silently rewrite live trading rules.*
+- **Decision**:
+  1. **Strict Controlled Learning & Anti-Self-Modification Governance (`backend/app/learning/learning_loop.py`, `backend/app/learning/models.py`)**:
+     - Enforce zero uncontrolled self-modification: any attempt to automatically or silently alter live trading rules, model prompts, or safety boundaries raises hard `UncontrolledModificationError`.
+     - The learning loop produces versioned, immutable `StrategyImprovementProposal` recommendations in status `PROPOSED`.
+     - Direct in-flight live parameter alteration is architecturally blocked via `guard_live_trading_immutability()`.
+     - Deploying an approved strategy version to active production requires verified human cryptographic authorization token (`settings.LIVE_TRADING_APPROVAL_TOKEN`).
+  2. **Comprehensive 8-Dimension Post-Trade Analytics Engine (`backend/app/learning/analytics.py`)**:
+     - Evaluate historical trade data across all 8 mandatory dimensions from the prompt pack:
+       - **Dimension 1 (Strategy Performance)**: Stratifies trades, win rate, gross P/L, friction, net P/L, profit factor, expectancy, max drawdown, and friction drag % across `MOMENTUM_CONTINUATION` and `EARLY_MOVE_DETECTION`.
+       - **Dimension 2 (Regime Performance)**: Stratifies performance across `BULLISH_TRENDING`, `BEARISH_TRENDING`, `HIGH_VOLATILITY_CHOP`, and `LOW_VOLATILITY_COMPRESSION`, identifying adverse friction drag in chop.
+       - **Dimension 3 (Feature Usefulness)**: Evaluates predictive power, correlation with net P/L, winner vs loser distribution separation score, and signal grades (`HIGH_SIGNAL`, `MODERATE_SIGNAL`, `LOW_SIGNAL`, `NOISY_REDUNDANT`) for RVOL, spread %, momentum ROC, volume acceleration, price acceleration, realized volatility, and liquidity score.
+       - **Dimension 4 (False Positives)**: Classifies losing trades into root-cause buckets (`PENNY_STOCK_SPREAD_EROSION`, `MOMENTUM_STALL`, `CHOP_WHIPSAW`, `SLIPPAGE_EXCESS`, `ADVERSE_REVERSAL`) with automated remediations.
+       - **Dimension 5 (False Exits)**: Evaluates exit efficiency across `TAKE_PROFIT`, `HARD_STOP`, and `TIME_EXPIRY`, measuring premature exits, whipsaw shakeouts, and Maximum Favorable Excursion (MFE) capture %.
+       - **Dimension 6 (AI Reasoning Quality)**: Audits Qwen3 analyst and DeepSeek-R1 challenger call counts, zero-fallback rates, latency, high/moderate confidence win rates, dispute arbitration accuracy, and unanimous vs contested win rates.
+       - **Dimension 7 (Execution Quality)**: Audits order submission ACK latencies, fill latencies, 100% fill rates, zero/adverse/favorable slippage distribution, and total slippage drag.
+       - **Dimension 8 (Cost Leakage)**: Computes full Indian statutory friction breakdown (brokerage, STT, exchange charges, SEBI, stamp duty, GST; ₹5.55 total across 13 trades, 172.4% friction drag ratio on micro-trades), micro-capital fee sensitivity at ₹100 (0.43%), ₹300 (0.14%), and ₹1000 (0.04%), and breakeven gross move hurdles (38.3 bps).
+  3. **Multi-Stage Gated Strategy Improvement Loop (`ControlledLearningLoop`)**:
+     - Implement 3 mandatory gating stages before any proposed parameter change can enter production:
+       - **Stage 1 (Backtest Validation Gate)**: Evaluates proposed parameter overrides against quantitative hurdles (Net P/L > 0, Profit Factor >= 1.20, Win Rate >= 45.0%, Max DD <= 5.0%).
+       - **Stage 2 (Out-of-Sample Paper Validation Gate)**: Requires Backtest Validation as a prerequisite (`ValidationPrerequisiteError` on bypass), and enforces operational hurdles: 0 risk invariant violations, 100% sub-50ms position watcher SLA compliance.
+       - **Stage 3 (Operator Token Promotion Gate)**: Requires explicit cryptographic human operator authorization token; creates a new semantic version (e.g. `v1.1.0-mom`) in SQLite `strategy_versions` and records a tamper-evident audit event.
+     - Provide operator rejection endpoint (`reject_proposal()`) requiring mandatory documented rationale (min 5 characters).
+  4. **SQLite WAL Persistence & Repository Integration (`backend/app/db/schema.py`, `backend/app/db/repository.py`)**:
+     - Added `strategy_proposals` table, indices on status and strategy name, and CRUD repository methods (`save_strategy_proposal`, `get_strategy_proposal`, `get_all_strategy_proposals`, `get_all_strategy_versions`).
+  5. **FastAPI Control Plane & Frontend Service Bindings (`backend/app/api/v1/endpoints/learning.py`, `frontend/src/services/api.ts`)**:
+     - Exposed `/api/v1/learning/analytics`, `/api/v1/learning/proposals`, `/api/v1/learning/proposals/generate`, `/api/v1/learning/proposals/{id}/validate-backtest`, `/api/v1/learning/proposals/{id}/validate-paper`, `/api/v1/learning/proposals/{id}/promote`, `/api/v1/learning/proposals/{id}/reject`, `/api/v1/learning/versions`, and `/api/v1/learning/report`.
+     - Wired API methods in frontend service layer (`getLearningAnalytics()`, `getStrategyProposals()`, `generateStrategyProposals()`, `getStrategyVersions()`, `getLearningReport()`).
+  6. **Evaluation Report & Gate Checkpoint**:
+     - Produced `LEARNING_IMPROVEMENT_REPORT.md` documenting verified analytics across 13 historical trades, versioned proposals, parameter diffs, security audit evidence, and gate checklist.
+     - System strictly halted at Phase 22 Gate Checkpoint awaiting human operator sign-off before Phase 23 (Final Production Hardening).
+- **Consequences**: Controlled, empirical, auditable strategy evolution; complete physical prevention of runaway self-modification or silent live rule alterations; mathematically validated improvements backed by backtest and paper evidence.
+- **Verification Evidence**:
+  - 8 dedicated unit and integration tests passing in `backend/tests/test_learning_loop.py`.
+  - 241/241 full repository pytest suite passing across 21 test modules.
+  - Static type checking clean (`mypy backend/app backend/tests` passing across 130 source files).
+  - Linting clean (`ruff check backend` passing with 0 errors).
+  - Production frontend build clean (`npm run build` completed in 2.71s with 0 errors).
+  - Formal evaluation report published (`LEARNING_IMPROVEMENT_REPORT.md`).
 
 
 

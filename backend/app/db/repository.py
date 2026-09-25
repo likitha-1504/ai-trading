@@ -983,6 +983,104 @@ class DatabaseRepository:
             row = cur.fetchone()
             return dict(row) if row else None
 
+    def get_all_strategy_versions(self, limit: int = 50) -> list[dict[str, Any]]:
+        """Retrieve all strategy versions in reverse chronological order."""
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                """
+                SELECT * FROM strategy_versions
+                ORDER BY created_at DESC LIMIT ?
+                """,
+                (limit,),
+            )
+            return [dict(r) for r in cur.fetchall()]
+
+    def save_strategy_proposal(self, proposal: Any) -> str:
+        """Persist or update a StrategyImprovementProposal."""
+        now = datetime.now(timezone.utc).isoformat()
+        status_val = (
+            proposal.status.value
+            if hasattr(proposal.status, "value")
+            else str(proposal.status)
+        )
+        param_changes_raw = (
+            [c.model_dump(mode="json") if hasattr(c, "model_dump") else dict(c) for c in proposal.parameter_changes]
+            if hasattr(proposal, "parameter_changes")
+            else []
+        )
+        backtest_raw = (
+            proposal.backtest_evidence.model_dump(mode="json")
+            if getattr(proposal, "backtest_evidence", None) and hasattr(proposal.backtest_evidence, "model_dump")
+            else getattr(proposal, "backtest_evidence", None)
+        )
+        paper_raw = (
+            proposal.paper_evidence.model_dump(mode="json")
+            if getattr(proposal, "paper_evidence", None) and hasattr(proposal.paper_evidence, "model_dump")
+            else getattr(proposal, "paper_evidence", None)
+        )
+        created_val = (
+            proposal.created_at.isoformat()
+            if hasattr(proposal, "created_at") and hasattr(proposal.created_at, "isoformat")
+            else str(getattr(proposal, "created_at", now))
+        )
+        approved_val = (
+            proposal.approved_at.isoformat()
+            if getattr(proposal, "approved_at", None) and hasattr(proposal.approved_at, "isoformat")
+            else str(proposal.approved_at) if getattr(proposal, "approved_at", None) else None
+        )
+
+        with get_connection(self.db_path) as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO strategy_proposals (
+                    id, strategy_name, target_version, current_version, status,
+                    title, empirical_weakness, parameter_changes, backtest_evidence,
+                    paper_evidence, approved_by, approval_token_masked, approved_at,
+                    rejection_reason, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    proposal.id,
+                    proposal.strategy_name,
+                    proposal.target_version,
+                    proposal.current_version,
+                    status_val,
+                    proposal.title,
+                    proposal.empirical_weakness,
+                    json.dumps(param_changes_raw, default=str),
+                    json.dumps(backtest_raw, default=str) if backtest_raw else None,
+                    json.dumps(paper_raw, default=str) if paper_raw else None,
+                    getattr(proposal, "approved_by", None),
+                    getattr(proposal, "approval_token_masked", None),
+                    approved_val,
+                    getattr(proposal, "rejection_reason", None),
+                    created_val,
+                ),
+            )
+        return proposal.id
+
+    def get_strategy_proposal(self, proposal_id: str) -> dict[str, Any] | None:
+        """Retrieve a specific strategy proposal by ID."""
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                "SELECT * FROM strategy_proposals WHERE id = ?",
+                (proposal_id,),
+            )
+            row = cur.fetchone()
+            return dict(row) if row else None
+
+    def get_all_strategy_proposals(self, limit: int = 50) -> list[dict[str, Any]]:
+        """Retrieve all strategy improvement proposals."""
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                """
+                SELECT * FROM strategy_proposals
+                ORDER BY created_at DESC LIMIT ?
+                """,
+                (limit,),
+            )
+            return [dict(r) for r in cur.fetchall()]
+
     # =========================================================================
     # 11. Model Calls
     # =========================================================================
@@ -1082,7 +1180,7 @@ class DatabaseRepository:
                     source,
                     level,
                     message,
-                    json.dumps(metadata) if metadata else None,
+                    json.dumps(metadata, default=str) if metadata else None,
                 ),
             )
             return cur.lastrowid or 0

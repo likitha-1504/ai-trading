@@ -19,6 +19,7 @@ from app.api.v1.endpoints import (
     system,
     trade_plans,
     trades,
+    learning,
 )
 
 api_router = APIRouter()
@@ -74,3 +75,7 @@ api_router.include_router(risk.router, prefix="/risk", tags=["risk"])
 
 # 14. Logs & Audit Trail Reconstruction
 api_router.include_router(logs.router, prefix="/logs", tags=["logs"])
+
+# 15. Learning & Continuous Improvement (Phase 22)
+api_router.include_router(learning.router, prefix="/learning", tags=["learning"])
+

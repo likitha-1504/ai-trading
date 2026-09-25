@@ -252,3 +252,32 @@ class ModeSwitchResponse(BaseModel):
     success: bool
     current_mode: str
     message: str
+
+
+# =====================================================================
+# 3. Learning & Continuous Improvement Schemas (Phase 22)
+# =====================================================================
+
+
+class ProposalPromotionRequest(BaseModel):
+    """Cryptographically gated request to promote a validated proposal to production."""
+
+    human_approval_token: str
+    approver: str = "OPERATOR"
+
+
+class ProposalRejectionRequest(BaseModel):
+    """Request to reject a strategy improvement proposal."""
+
+    reason: str
+
+
+class ProposalActionResponse(BaseModel):
+    """Result of proposal validation, promotion, or rejection action."""
+
+    success: bool
+    proposal_id: str
+    status: str
+    message: str
+    details: dict[str, Any] | None = None
+
