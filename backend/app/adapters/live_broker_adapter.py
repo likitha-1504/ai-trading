@@ -48,8 +48,14 @@ class LiveBrokerAdapter(BrokerAdapter):
         account_id: str = "ACC_LIVE_001",
         is_sandbox: bool = True,
         initial_cash: Decimal = Decimal("100.00"),
+        max_order_notional: Decimal = Decimal("100.00"),
     ) -> None:
         super().__init__()
+        if max_order_notional > Decimal("300.00"):
+            raise LiveBrokerSecurityError(
+                f"Autonomous order notional ceiling ₹{max_order_notional} exceeds ₹300.00 limit. "
+                "Silent elevation above ₹300 is strictly prohibited."
+            )
         self.broker_name = broker_name.upper()
         self.api_key = api_key
         self.api_secret = api_secret
@@ -57,6 +63,7 @@ class LiveBrokerAdapter(BrokerAdapter):
         self.account_id = account_id
         self.is_sandbox = is_sandbox
         self.initial_cash = initial_cash
+        self.max_order_notional = max_order_notional
 
         self._connected: bool = False
         self._last_ping_ms: float = 0.0
@@ -151,13 +158,14 @@ class LiveBrokerAdapter(BrokerAdapter):
                 "when IS_PAPER_TRADING=True."
             )
 
-        # Invariant 2: Strict ₹100 Notional Capital Cap
-        order_price = request.price or request.stop_price or Decimal("100.00")
+        # Invariant 2: Strict Notional Capital Cap (₹100 baseline, up to ₹300 in Autonomous Mode)
+        order_price = request.price or request.stop_price or self.max_order_notional
         notional_value = order_price * Decimal(str(request.quantity))
-        if notional_value > Decimal("100.00"):
+        if notional_value > self.max_order_notional:
             logger.error(
-                "Order rejected by safety fence: Notional ₹%.2f exceeds ₹100.00 live limit.",
+                "Order rejected by safety fence: Notional ₹%.2f exceeds ₹%.2f live limit.",
                 notional_value,
+                self.max_order_notional,
             )
             rejected_event = OrderEvent(
                 client_order_id=request.client_order_id,
@@ -167,7 +175,7 @@ class LiveBrokerAdapter(BrokerAdapter):
                 filled_quantity=0,
                 remaining_quantity=request.quantity,
                 timestamp=datetime.now(timezone.utc),
-                rejection_reason="Notional order value exceeds ₹100 live capital cap",
+                rejection_reason=f"Notional order value exceeds ₹{int(self.max_order_notional)} live capital cap",
             )
             self._orders[request.client_order_id] = rejected_event
             self._notify_order_event(rejected_event)

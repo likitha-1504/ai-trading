@@ -565,6 +565,55 @@ This document tracks all critical architectural, design, and technical decisions
   - Production frontend build clean (`npm run build` completed in 1.87s with 0 errors).
   - `LIVE_EXPERIMENT_REPORT.md` generated.
 
+---
+
+## ADR-021: Phase 21 — ₹300 Autonomous Mode Implementation, Multi-Tier Risk Invariant Preservation, and Human Approval Gating
+
+- **Status**: ACCEPTED (Phase 21 Implementation Complete; Halted at Phase 21 Gate Checkpoint)
+- **Date**: 2026-09-25
+- **Context**: The Phase-Wise Prompt Pack (Page 25) mandates strict rules for entering and operating ₹300 Autonomous Mode:
+  1. *Only enter this phase after documented validation and human approval.*
+  2. *Enable autonomous operation only up to the configured ₹300 threshold.*
+  3. *Maintain all 7 core risk and safety invariants:*
+     - Deterministic risk limits (1.5% max risk per trade, min net edge hurdle)
+     - Capital caps (₹300 autonomous ceiling, hard boundary checks)
+     - Circuit breakers (3.0% daily drawdown circuit breaker)
+     - Independent Position Watcher (sub-50ms SLA, zero LLM dependency on exits)
+     - Full audit logging (SQLite WAL persistence, structured telemetry)
+     - Automatic recovery (rehydration of active positions, capital state, pending orders)
+     - Human override (emergency kill switch, manual approval required above ₹300)
+  4. *Above ₹300, require explicit human approval (`ApprovalMode.MANUAL_PENDING`).*
+  5. *Do not silently raise the threshold.*
+- **Decision**:
+  1. **Phase Entry Gate Verification**:
+     - Built `activate_autonomous_mode()` in `AutonomousModeEngine` requiring both documented prior validation (`LIVE_EXPERIMENT_REPORT.md`) and verified operator cryptographic authentication (`LIVE_TRADING_APPROVAL_TOKEN`).
+     - Any unauthorized invocation raises a hard `AutonomousModeSecurityError`.
+  2. **Strict ₹300 Autonomous Threshold Enforcement**:
+     - Bounded `AutonomousModeConfig.autonomous_threshold` and `capital_limit` strictly to ₹300.00.
+     - Added hard validation: any attempt to configure or elevate the threshold above ₹300 raises an immediate `AutonomousModeSecurityError`.
+     - Configured `LiveBrokerAdapter` preflight safety fence to reject any order whose notional exceeds the configured ceiling.
+  3. **Allocation Gating (Autonomous vs Manual Pending)**:
+     - Implemented `evaluate_allocation(symbol, price, quantity) -> (ApprovalMode, str)`:
+       - Notional <= ₹300.00 -> `ApprovalMode.AUTONOMOUS` (dispatched without manual intervention).
+       - Notional > ₹300.00 -> `ApprovalMode.MANUAL_PENDING` (held until explicit human operator token approval via `approve_manual_trade()`).
+       - Tripped circuit breaker -> `ApprovalMode.REJECTED` (all new entries immediately blocked).
+  4. **Multi-Session Simulation & 7 Invariant Verification**:
+     - Executed 5 simulated trading sessions verifying deterministic risk limits, take profits, hard stops, 15:15 IST time expiries, sub-50ms independent watcher SLA (0 LLM exit calls), SQLite WAL audit trail, crash recovery state rehydration, and circuit breaker trip enforcement at 3.0% drawdown.
+  5. **FastAPI Control Plane & Frontend Service Bindings**:
+     - Exposed `/api/v1/autonomous/status`, `/api/v1/autonomous/activate`, `/api/v1/autonomous/evaluate-allocation`, `/api/v1/autonomous/approve-manual-trade`, `/api/v1/autonomous/run`, and `/api/v1/autonomous/report`.
+     - Wired frontend query and evaluation methods in `frontend/src/services/api.ts` (`getAutonomousModeStatus()`, `getAutonomousModeReport()`, `evaluateAllocation()`).
+  6. **Phase 21 Evaluation Report & Gate Checkpoint**:
+     - Produced `AUTONOMOUS_MODE_REPORT.md` documenting verified invariants, audited PnL, allocation gating breakdown, and governance rules.
+     - Enforced mandatory halt at Phase 21 Gate Checkpoint awaiting human operator sign-off before entering Phase 22 (Learning & Continuous Improvement).
+- **Consequences**: Autonomous execution safely unlocked up to ₹300 ceiling with zero possibility of silent threshold elevation; all allocations above ₹300 gated behind human approval; absolute preservation of all deterministic risk barriers and emergency switches.
+- **Verification Evidence**:
+  - 12 dedicated unit and integration tests passing in `backend/tests/test_autonomous_mode.py`.
+  - 233/233 full repository pytest suite passing across 20 test modules.
+  - Static type checking clean (`mypy backend/app backend/tests` passing across 123 source files).
+  - Linting clean (`ruff check .` passing with 0 errors).
+  - Production frontend build clean (`npm run build` completed in 1.97s with 0 errors).
+  - Evaluation report generated (`AUTONOMOUS_MODE_REPORT.md`).
+
 
 
 

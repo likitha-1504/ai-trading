@@ -4,6 +4,7 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     ai,
+    autonomous,
     backtests,
     candidates,
     dashboard,
@@ -25,6 +26,7 @@ api_router = APIRouter()
 # 1. Health & System
 api_router.include_router(system.router, prefix="/system", tags=["system"])
 api_router.include_router(live_experiment.router, prefix="/live/experiment", tags=["live-experiment"])
+api_router.include_router(autonomous.router, prefix="/autonomous", tags=["autonomous"])
 
 
 @api_router.get("/health", tags=["system"], summary="Basic liveness probe")

@@ -323,4 +323,46 @@ export const api = {
       report_markdown: "# Phase 20: Controlled ₹100 Live Experiment Evaluation Report\n\nStatus: Awaiting Human Approval",
     });
   },
+
+  async getAutonomousModeStatus(): Promise<any> {
+    return fetchWithFallback<any>(`${API_BASE}/autonomous/status`, {
+      phase: "PHASE_21_AUTONOMOUS_MODE",
+      autonomous_threshold: 300.0,
+      capital_limit: 300.0,
+      strategy_version: "v1.0.0-phase21",
+      is_activated: true,
+      circuit_breaker_tripped: false,
+      safety_invariants: {
+        deterministic_risk_limits: true,
+        capital_caps: true,
+        circuit_breakers: true,
+        independent_position_watcher: true,
+        full_audit_logging: true,
+        automatic_recovery: true,
+        human_override: true,
+      },
+      gate_status: "PHASE_21_GATE_CHECKPOINT_AWAITING_APPROVAL",
+    });
+  },
+
+  async getAutonomousModeReport(): Promise<any> {
+    return fetchWithFallback<any>(`${API_BASE}/autonomous/report`, {
+      run_id: "RUN-PHASE21-AUTO-300",
+      report_markdown: "# Phase 21: ₹300 Autonomous Mode Evaluation Report\n\nStatus: Awaiting Human Approval",
+    });
+  },
+
+  async evaluateAllocation(symbol: string, price: number, quantity: number): Promise<any> {
+    const notional = price * quantity;
+    return fetchWithFallback<any>(`${API_BASE}/autonomous/evaluate-allocation`, {
+      symbol,
+      notional,
+      autonomous_ceiling: 300.0,
+      approval_mode: notional <= 300.0 ? "AUTONOMOUS" : "MANUAL_PENDING",
+      decision_reason:
+        notional <= 300.0
+          ? `AUTONOMOUS: Notional ₹${notional.toFixed(2)} <= ₹300.00 ceiling.`
+          : `MANUAL_PENDING: Notional ₹${notional.toFixed(2)} exceeds ₹300.00 ceiling.`,
+    });
+  },
 };

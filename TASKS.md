@@ -312,14 +312,38 @@ Status Key:
 - [x] Integrate Phase 20 FastAPI endpoints (`/api/v1/live/experiment/status`, `/api/v1/live/experiment/report`, `/api/v1/live/experiment/run`, `/api/v1/live/experiment/strategy-version`, `/api/v1/live/experiment/capital-request`) and frontend service bindings
 - [x] Produce comprehensive Controlled ₹100 Live Experiment Evaluation Report (`LIVE_EXPERIMENT_REPORT.md`) with explicit statistical cautionary warning: "Never interpret short-term profit as proof of a robust strategy"
 - [x] Run full test regression and static checks (221/221 pytest passed across 18 test modules, ruff clean, mypy clean, Vite build clean)
-- [!] Phase 20 Gate Checkpoint: Controlled ₹100 Live Experiment Evaluation (MANDATORY GATE CHECKPOINT REACHED - System strictly halted awaiting explicit operator sign-off before entering Phase 21)
+- [x] Phase 20 Gate Checkpoint: Controlled ₹100 Live Experiment Evaluation (APPROVED by User for Phase 21 Continuation)
 
 ---
 
 ## Phase 21: ₹300 Autonomous Mode
-- [ ] Elevate autonomous trading ceiling to ₹300 after validated performance
-- [ ] Require explicit human approval for any allocation above ₹300
-- [!] Phase 21 Sign-Off
+- [x] Elevate autonomous trading ceiling to ₹300 after validated performance (`backend/app/autonomous/config.py`, `backend/app/autonomous/autonomous_engine.py`)
+  - [x] Phase entry gate: require documented prior validation evidence (`LIVE_EXPERIMENT_REPORT.md`) and cryptographic human approval token (`settings.LIVE_TRADING_APPROVAL_TOKEN`)
+  - [x] Enable autonomous operation strictly up to the configured ₹300 threshold
+  - [x] Pre-flight adapter safety fences enforce ₹300 ceiling (`backend/app/adapters/live_broker_adapter.py`)
+  - [x] Strict prohibition of silent threshold elevation: raise hard `AutonomousModeSecurityError` on any attempt to increase threshold without authorized gating
+- [x] Maintain all 7 core risk and safety invariants across multi-session simulation:
+  - [x] Invariant 1: Deterministic risk limits (1.5% max risk per trade, min net edge hurdle)
+  - [x] Invariant 2: Capital caps (₹300 autonomous ceiling, hard boundary checks)
+  - [x] Invariant 3: Circuit breakers (3.0% daily drawdown circuit breaker trips at ₹9.00 cumulative loss)
+  - [x] Invariant 4: Independent Position Watcher (continuous sub-50ms SLA, zero LLM dependency on exits)
+  - [x] Invariant 5: Full audit logging (SQLite WAL ACID journal of all trade plans, executions, risk events, and activations)
+  - [x] Invariant 6: Automatic recovery (rehydration of active positions, capital state, pending orders via `RestartRecoveryManager`)
+  - [x] Invariant 7: Human override (emergency kill switch halts pipeline and liquidates; manual override workflow for trades above ₹300)
+- [x] Require explicit human approval for any allocation above ₹300 (`ApprovalMode.MANUAL_PENDING`):
+  - [x] Allocations <= ₹300 marked `ApprovalMode.AUTONOMOUS` and dispatched automatically
+  - [x] Allocations > ₹300 marked `ApprovalMode.MANUAL_PENDING` and blocked from autonomous dispatch
+  - [x] Dedicated operator override endpoint: `POST /api/v1/autonomous/approve-manual-trade`
+- [x] Implement Phase 21 FastAPI control plane endpoints (`backend/app/api/v1/endpoints/autonomous.py`, `backend/app/api/v1/router.py`) and frontend service bindings (`frontend/src/services/api.ts`):
+  - [x] `GET /api/v1/autonomous/status`
+  - [x] `POST /api/v1/autonomous/activate`
+  - [x] `POST /api/v1/autonomous/evaluate-allocation`
+  - [x] `POST /api/v1/autonomous/approve-manual-trade`
+  - [x] `POST /api/v1/autonomous/run`
+  - [x] `GET /api/v1/autonomous/report`
+- [x] Comprehensive test suite (`backend/tests/test_autonomous_mode.py`) passing 12/12 tests (233/233 full suite regression passing, ruff & mypy clean, Vite build clean)
+- [x] Produce comprehensive Phase 21 Evaluation Report (`AUTONOMOUS_MODE_REPORT.md`)
+- [!] Phase 21 Gate Checkpoint: ₹300 Autonomous Mode Sign-Off (MANDATORY GATE CHECKPOINT REACHED - System strictly halted awaiting explicit operator sign-off before entering Phase 22)
 
 ---
 
