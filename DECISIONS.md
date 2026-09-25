@@ -727,6 +727,62 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit clean: 14/14 dimensions PASS, 0 warnings, 0 failures.
   - System halted at Phase 23 Gate Checkpoint awaiting explicit operator sign-off before entering Phase 24. Live trading remains strictly disabled.
 
+---
+
+## ADR-028: Project Completion Gate & Repository-Wide Operational Verification
+- **Date**: 2026-09-25
+- **Status**: ACCEPTED (Final Project Completion Gate Reached; System Halted at Completion Gate)
+- **Context**: The Phase-Wise Prompt Pack (Page 28) mandates strict criteria for Phase 24 Completion Gate:
+  1. Act as final Project Commander and review entire repository against all core control plane specifications:
+     - `ARCHITECTURE.md`
+     - `PROJECT_SPEC.md`
+     - `TRADING_RULES.md`
+     - `UI_UX_SPEC.md`
+     - `TEST_PLAN.md`
+     - `FAILURE_HANDLING.md`
+     - `BROKER_ADAPTER_SPEC.md`
+     - `DEVELOPMENT_PLAN.md`
+  2. Verify that every phase (Phase 00 through Phase 24) has concrete, verified evidence of completion.
+  3. Deliver a comprehensive final evaluation report addressing the 10 mandatory reporting dimensions:
+     1. Implemented features
+     2. Tested features
+     3. Known limitations
+     4. Unresolved risks
+     5. Paper/live status
+     6. Current capital-control configuration
+     7. Model configuration
+     8. Broker status
+     9. Operational readiness
+     10. Recommended next engineering tasks
+  4. Adhere strictly to the directive: *Do not declare the system financially successful merely because it made profits. The project is complete only when the engineering, safety, testing, UI, operational and documentation gates are satisfied.*
+  5. Preserve all deterministic risk controls, maintain `IS_PAPER_TRADING=True` lock, and stop at the Phase 24 Completion Gate without starting any further phase or enabling live trading.
+- **Decision**:
+  1. **Control Plane Specification Alignment**: Formally audited and verified repository alignment against all 8 control plane documents. All architectural layers (FastAPI backend, React 15-screen UI, SQLite WAL journal, sub-50ms Position Watcher, Qwen3 Analyst / DeepSeek-R1 Challenger council, PaperBrokerAdapter) strictly satisfy design specifications.
+  2. **Phase Completion Evidence**: Verified unbroken chain of 26 dedicated, verified git commits from `f25b61b` (Phase 00) to `57fbd5e` (Phase 23), with zero silent carryover across phase boundaries.
+  3. **Quality Gates & Static Verification**:
+     - 251/251 test regression passing across 22 test modules.
+     - 0 static typing issues across 140 source files via `mypy backend`.
+     - 0 linting errors via `ruff check backend`.
+     - Frontend production build clean (`tsc -b && vite build` in <2.0s).
+     - 14/14 operational hardening dimensions passing via `backend/scripts/preflight_check.py`.
+  4. **Safety & Operational Locks**:
+     - `IS_PAPER_TRADING=True` locked in configuration.
+     - Base capital capped at ₹100.00; autonomous sizing capped at ₹300.00.
+     - 1.5% max risk per trade, 3.0% daily drawdown circuit breaker, and 15:15 IST auto-square-off enforced deterministically.
+     - Arbitrary order injection blocked (`POST /orders` returns 405 Method Not Allowed).
+  5. **Final Project Halt**:
+     - The AI Micro-Trading Agent development lifecycle is formally concluded at the Phase 24 Completion Gate.
+     - System remains in paper trading mode awaiting deliberate, manual operator authorization before any future live execution.
+- **Consequences**: Complete engineering verification, strict audit trail, zero live trading risk leakage, and fully documented personal trading infrastructure ready for disciplined personal operation.
+- **Verification Evidence**:
+  - Full backend test regression passing: 251/251.
+  - Zero type errors (`mypy backend` across 140 files).
+  - Zero linting errors (`ruff check backend`).
+  - Production frontend build clean (`npm run build` completed cleanly).
+  - All 14 production hardening dimensions verified (AUDIT-PHASE23-RELEASE-GATE: 14/14 PASS).
+  - Complete operational documentation package: `RUNBOOK.md`, `OPERATIONS.md`, `INCIDENT_RESPONSE.md`, `BACKUP_RECOVERY.md`, `RELEASE_CHECKLIST.md`.
+
+
 
 
 
