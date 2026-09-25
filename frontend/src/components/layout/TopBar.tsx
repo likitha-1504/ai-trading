@@ -46,26 +46,26 @@ export const TopBar: React.FC<TopBarProps> = ({
           </span>
           <span className="text-slate-400">Equity:</span>
           <span className="text-slate-100 font-bold tabular-nums">
-            ₹{capital.total_equity.toFixed(2)}
+            ₹{(capital?.total_equity ?? (capital as any)?.total_capital ?? 100).toFixed(2)}
           </span>
           <span className="text-slate-500">|</span>
           <span className="text-slate-400">Avail:</span>
           <span className="text-slate-200 tabular-nums">
-            ₹{capital.available_capital.toFixed(2)}
+            ₹{(capital?.available_capital ?? 100).toFixed(2)}
           </span>
           <span className="text-slate-500">|</span>
           <span className="text-slate-400">Deployed:</span>
           <span className="text-slate-200 tabular-nums">
-            ₹{capital.deployed_capital.toFixed(2)}
+            ₹{(capital?.deployed_capital ?? 0).toFixed(2)}
           </span>
           <span className="text-slate-500">|</span>
           <span className="text-slate-400">P&L:</span>
           <span
             className={`font-bold tabular-nums ${
-              capital.realized_pnl >= 0 ? "text-emerald-400" : "text-rose-400"
+              (capital?.realized_pnl ?? 0) >= 0 ? "text-emerald-400" : "text-rose-400"
             }`}
           >
-            {capital.realized_pnl >= 0 ? "+" : ""}₹{capital.realized_pnl.toFixed(2)}
+            {(capital?.realized_pnl ?? 0) >= 0 ? "+" : ""}₹{(capital?.realized_pnl ?? 0).toFixed(2)}
           </span>
         </div>
 

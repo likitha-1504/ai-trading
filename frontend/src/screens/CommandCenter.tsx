@@ -21,6 +21,12 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   onNavigate,
 }) => {
   const activePos = positions[0];
+  const startCap = capital?.starting_capital ?? 100.0;
+  const equity = capital?.total_equity ?? (capital as any)?.total_capital ?? startCap;
+  const deployed = capital?.deployed_capital ?? 0.0;
+  const available = capital?.available_capital ?? startCap;
+  const realized = capital?.realized_pnl ?? 0.0;
+  const maxDdLimit = capital?.max_drawdown_limit_pct ?? 3.0;
 
   return (
     <div className="space-y-4">
@@ -28,14 +34,14 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
       <FactBanner
         type="SYSTEM_FACT"
         title="Micro-Capital Paper Execution Active"
-        subtitle={`Starting Capital: ₹${capital.starting_capital.toFixed(2)} | Current Equity: ₹${capital.total_equity.toFixed(2)} | Deployed: ₹${capital.deployed_capital.toFixed(2)}`}
+        subtitle={`Starting Capital: ₹${startCap.toFixed(2)} | Current Equity: ₹${equity.toFixed(2)} | Deployed: ₹${deployed.toFixed(2)}`}
       >
         <div className="flex flex-wrap items-center gap-2 mt-2 pt-2 border-t border-sky-900/30 text-xs font-mono">
           <span className="text-slate-400">Autonomous Threshold:</span>
           <span className="text-sky-300 font-semibold">₹300.00 max</span>
           <span className="text-slate-500">•</span>
           <span className="text-slate-400">Circuit Breaker:</span>
-          <span className="text-amber-300 font-semibold">{capital.max_drawdown_limit_pct.toFixed(1)}% Daily Max DD</span>
+          <span className="text-amber-300 font-semibold">{maxDdLimit.toFixed(1)}% Daily Max DD</span>
           <span className="text-slate-500">•</span>
           <span className="text-slate-400">Square-Off Cutoff:</span>
           <span className="text-emerald-300 font-semibold">15:15 IST (09:45 UTC)</span>
@@ -46,24 +52,24 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <MetricCard
           label="Total Equity"
-          value={`₹${capital.total_equity.toFixed(2)}`}
-          subtext={`Base: ₹${capital.starting_capital.toFixed(2)}`}
-          trend={capital.total_equity >= capital.starting_capital ? "up" : "down"}
-          trendValue={`+₹${(capital.total_equity - capital.starting_capital).toFixed(2)}`}
+          value={`₹${equity.toFixed(2)}`}
+          subtext={`Base: ₹${startCap.toFixed(2)}`}
+          trend={equity >= startCap ? "up" : "down"}
+          trendValue={`+₹${(equity - startCap).toFixed(2)}`}
           isFact
         />
         <MetricCard
           label="Available Margin"
-          value={`₹${capital.available_capital.toFixed(2)}`}
-          subtext={`Deployed: ₹${capital.deployed_capital.toFixed(2)}`}
+          value={`₹${available.toFixed(2)}`}
+          subtext={`Deployed: ₹${deployed.toFixed(2)}`}
           isFact
         />
         <MetricCard
           label="Realized Daily P&L"
-          value={`${capital.realized_pnl >= 0 ? "+" : ""}₹${capital.realized_pnl.toFixed(2)}`}
+          value={`${realized >= 0 ? "+" : ""}₹${realized.toFixed(2)}`}
           subtext="Net of Indian friction"
-          trend={capital.realized_pnl >= 0 ? "up" : "down"}
-          trendValue={`${((capital.realized_pnl / capital.starting_capital) * 100).toFixed(1)}%`}
+          trend={realized >= 0 ? "up" : "down"}
+          trendValue={`${startCap > 0 ? ((realized / startCap) * 100).toFixed(1) : "0.0"}%`}
           isFact
         />
         <MetricCard

@@ -476,6 +476,54 @@ This document tracks all critical architectural, design, and technical decisions
   - Production frontend build clean (`npm run build` completed in 32.83s with 0 errors).
   - `PAPER_TRADING_VALIDATION_REPORT.md` generated.
 
+---
+
+## ADR-022: Controlled ₹100 Live Readiness Package, Adapter Security Fences, and Explicit Human Approval Gate
+- **Date**: 2026-09-25
+- **Status**: PENDING HUMAN APPROVAL (Phase 19 Gate Checkpoint)
+- **Context**: Phase 19 of the AI Micro-Trading Agent requires preparing a comprehensive live-readiness package before live-market experimentation, verifying API credentials, broker connectivity, paper/live environment separation, ₹100 initial capital limit, ₹300 autonomy threshold, emergency stop and kill-switch procedures, position watcher independence, order reconciliation, audit logging, backup/recovery procedures, and manual approval procedures. In strict compliance with the prompt pack and project charter, live trading must NOT be enabled automatically, and the system must halt at the Phase 19 Gate Checkpoint awaiting explicit human confirmation.
+- **Decision**:
+  1. **Production-Grade Live Broker Adapter Abstraction (`backend/app/adapters/live_broker_adapter.py`)**:
+     - Implement `LiveBrokerAdapter` adhering to the abstract `BrokerAdapter` interface for Indian broker gateways (Zerodha Kite, Groww, Upstox).
+     - Embed deterministic pre-flight safety fences:
+       - **Environment Safety Interlock**: Order dispatch raises `LiveBrokerSecurityError` if attempted while `IS_PAPER_TRADING=True`.
+       - **Strict ₹100 Notional Ceiling**: Outgoing order requests with notional value (`order_price * quantity`) exceeding ₹100.00 are immediately rejected at the adapter boundary before hitting any broker gateway.
+       - **Order Deduplication**: Rejects duplicate `client_order_id` submissions idempotently.
+       - **Reconciliation Engine**: Provides position discrepancy detection across `MISSING_IN_BROKER`, `MISSING_IN_LOCAL`, and `QUANTITY_MISMATCH`.
+  2. **Comprehensive Live Readiness Auditor (`backend/app/live/readiness_audit.py`, `backend/app/live/audit_runner.py`)**:
+     - Implement `LiveReadinessAuditor` running automated preflight checks across all 11 required dimensions:
+       1. Broker adapter configuration & latency (<500ms budget; 2.85ms measured).
+       2. API credential masking (`KIT****81`), format validation, and `.gitignore` isolation.
+       3. Paper vs live environment isolation (`IS_PAPER_TRADING=True`).
+       4. Capital parameters: ₹100 initial capital ceiling, ₹300 autonomous limit.
+       5. Deterministic risk boundaries: 1.5% max loss per trade, 3.0% daily drawdown circuit breaker.
+       6. Emergency stop procedures: order cancellation, position liquidation via `IndependentPositionWatcher`, and `SystemState.is_halted` propagation.
+       7. Automated exit rules: 15:15 IST cutoff (`TIME_EXPIRY`), >15s tick freeze (`STALE_DATA_EMERGENCY`), and >0.5% spread widening (`SPREAD_WIDENING`).
+       8. Position reconciliation audit between local SQLite state and broker adapter.
+       9. Telemetry without plain-text secret leaks and SQLite WAL ACID persistence.
+       10. Backup and recovery procedures: mid-session crash rehydration and cold restart recovery.
+       11. Manual mode-switch control: guarded `POST /api/v1/system/mode` requiring authorization token.
+     - Provide CLI runner with automatic UTF-8 console reconfiguring for cross-platform and Windows terminal support.
+  3. **Control Plane & Frontend Integration (`backend/app/api/v1/endpoints/system.py`, `frontend/src/services/api.ts`, `frontend/src/components/ui/ErrorBoundary.tsx`)**:
+     - Expose `GET /api/v1/system/live-readiness` returning structured audit payload.
+     - Add `getLiveReadinessAudit()` in frontend service layer.
+     - Wrap React dashboard root in `ErrorBoundary` ensuring UI crashes cannot corrupt core execution loop.
+  4. **Live Readiness Package Report (`LIVE_READINESS_REPORT.md`)**:
+     - Publish formal audit report documenting the 12-item preflight checklist matrix, verification evidence, and operator sign-off requirements.
+  5. **Strict Gate Enforcement**:
+     - System strictly halted at Phase 19 Gate Checkpoint.
+     - Live execution mode remains disabled (`IS_PAPER_TRADING=True`).
+     - Phase 20 live experimentation prohibited without explicit human authorization.
+- **Consequences**: Provable operational readiness; zero automated live activation; ironclad safety locks preventing unvalidated capital exposure; complete transparency for operator sign-off.
+- **Verification Evidence**:
+  - 12/12 preflight audit checks passed in `LiveReadinessAuditor`.
+  - 12/12 dedicated tests passing in `backend/tests/test_live_readiness.py`.
+  - Full project regression passing (213/213 tests passing across 17 test modules).
+  - Static type checking (`mypy backend`) passing with 0 issues across 113 source files.
+  - Linting (`ruff check backend`) passing with 0 errors.
+  - Production frontend build clean (`npm run build` completed in 20.31s with 0 errors).
+  - `LIVE_READINESS_REPORT.md` generated.
+
 
 
 

@@ -23,6 +23,7 @@ from app.core.config import settings
 from app.db.connection import get_connection
 from app.db.repository import DatabaseRepository
 from app.execution.execution_engine import ExecutionEngine
+from app.live.readiness_audit import LiveReadinessAuditor, LiveReadinessAuditResult
 from app.watcher.position_watcher import IndependentPositionWatcher
 
 router = APIRouter()
@@ -211,3 +212,17 @@ def switch_system_mode(
         current_mode=sys_state.mode,
         message=msg,
     )
+
+
+@router.get(
+    "/live-readiness",
+    response_model=LiveReadinessAuditResult,
+    summary="Phase 19 Controlled Live Readiness Audit",
+    description="Audits API credentials, broker connection, safety systems, and Phase 19 approval gate.",
+)
+def get_live_readiness_audit(
+    sys_state: SystemState = Depends(get_system_state),
+) -> LiveReadinessAuditResult:
+    auditor = LiveReadinessAuditor(system_state=sys_state)
+    return auditor.run_full_audit()
+

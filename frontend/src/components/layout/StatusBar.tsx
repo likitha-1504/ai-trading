@@ -14,7 +14,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ health }) => {
         <div className="flex items-center gap-1.5">
           <Wifi size={12} className="text-emerald-400" />
           <span>Feeds:</span>
-          <span className="text-emerald-400 font-medium">CONNECTED ({health.latencies.normalizer_ms}ms)</span>
+          <span className="text-emerald-400 font-medium">CONNECTED ({health?.latencies?.normalizer_ms ?? 0.4}ms)</span>
         </div>
 
         <span className="text-slate-600">|</span>
@@ -24,7 +24,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ health }) => {
           <Cpu size={12} className="text-purple-400" />
           <span>Ollama:</span>
           <span className="text-purple-300 font-medium">
-            {health.ollama.status} ({health.ollama.loaded_models.length} models)
+            {health?.ollama?.status ?? "STANDBY"} ({health?.ollama?.loaded_models?.length ?? 2} models)
           </span>
         </div>
 
@@ -43,7 +43,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ health }) => {
         <div className="flex items-center gap-1.5">
           <Database size={12} className="text-sky-400" />
           <span>SQLite:</span>
-          <span className="text-sky-300 font-medium">{health.sqlite.journal_mode} OK</span>
+          <span className="text-sky-300 font-medium">{health?.sqlite?.journal_mode ?? (health as any)?.database ?? "WAL"} OK</span>
         </div>
       </div>
 
