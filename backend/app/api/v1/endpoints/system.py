@@ -226,3 +226,83 @@ def get_live_readiness_audit(
     auditor = LiveReadinessAuditor(system_state=sys_state)
     return auditor.run_full_audit()
 
+
+# =============================================================================
+# Phase 23: Production Hardening, Integrity & Disaster Recovery Endpoints
+# =============================================================================
+
+
+@router.get(
+    "/hardening-audit",
+    summary="Phase 23 Comprehensive 14-Dimension Hardening Audit",
+    description="Audits startup/restart, database integrity, logs, backups, configuration, secrets, broker isolation, and operational readiness.",
+)
+def get_hardening_audit(
+    repo: DatabaseRepository = Depends(get_db_repo),
+) -> dict:
+    from app.ops.hardening_runner import ProductionHardeningRunner
+
+    db_path = repo.db_path or settings.DATABASE_PATH
+    runner = ProductionHardeningRunner(db_path=db_path)
+    audit = runner.verify_all_dimensions()
+    return audit.model_dump()
+
+
+@router.get(
+    "/integrity",
+    summary="Phase 23 SQLite Storage and Accounting Integrity Check",
+    description="Executes PRAGMA integrity_check, foreign_key_check, table validation, and financial accounting parity checks.",
+)
+def get_database_integrity(
+    repo: DatabaseRepository = Depends(get_db_repo),
+) -> dict:
+    from app.ops.integrity_verifier import DatabaseIntegrityVerifier
+
+    db_path = repo.db_path or settings.DATABASE_PATH
+    verifier = DatabaseIntegrityVerifier(db_path=db_path)
+    report = verifier.run_full_verification()
+    return report.model_dump()
+
+
+@router.post(
+    "/backup/create",
+    summary="Create online verified database backup snapshot",
+    description="Executes native SQLite online backup, computes SHA-256 hash, and verifies snapshot integrity.",
+)
+def create_backup_snapshot(
+    tag: str = "manual",
+    repo: DatabaseRepository = Depends(get_db_repo),
+) -> dict:
+    from app.ops.backup_manager import BackupManager
+
+    db_path = repo.db_path or settings.DATABASE_PATH
+    mgr = BackupManager(db_path=db_path)
+    try:
+        meta = mgr.create_backup(tag=tag)
+        return {
+            "success": True,
+            "message": f"Backup {meta.backup_id} created and verified.",
+            "backup": meta.model_dump(),
+        }
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Backup generation failed: {e}",
+        )
+
+
+@router.get(
+    "/backup/list",
+    summary="List verified database backup snapshots",
+    description="Returns all available verified SQLite database backups with cryptographic checksums.",
+)
+def list_backups(
+    repo: DatabaseRepository = Depends(get_db_repo),
+) -> list[dict]:
+    from app.ops.backup_manager import BackupManager
+
+    db_path = repo.db_path or settings.DATABASE_PATH
+    mgr = BackupManager(db_path=db_path)
+    return [b.model_dump() for b in mgr.list_backups()]
+
+

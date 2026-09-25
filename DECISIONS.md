@@ -665,6 +665,69 @@ This document tracks all critical architectural, design, and technical decisions
   - Production frontend build clean (`npm run build` completed in 2.71s with 0 errors).
   - Formal evaluation report published (`LEARNING_IMPROVEMENT_REPORT.md`).
 
+---
+
+## ADR-027: Final Production Hardening, SQLite WAL Online Backups, Disaster Recovery, and Operational Readiness
+- **Date**: 2026-09-25
+- **Status**: ACCEPTED (Phase 23 Implementation Complete; Halted at Phase 23 Gate Checkpoint)
+- **Context**: The Phase-Wise Prompt Pack (Page 27) mandates strict requirements for Phase 23 Final Production Hardening:
+  1. *Prepare the project for long-term personal operation.*
+  2. *Verify: startup/restart, database integrity, logs, backups, configuration, secrets handling, broker isolation, live/paper separation, health monitoring, UI reliability, API security, dependency pinning, reproducible builds, documentation.*
+  3. *Create: RUNBOOK.md, OPERATIONS.md, INCIDENT_RESPONSE.md, BACKUP_RECOVERY.md, RELEASE_CHECKLIST.md.*
+  4. *Produce final architecture and operational documentation.*
+- **Decision**:
+  1. **Automated SQLite Online Backups, Verification & Rotation (`backend/app/ops/backup_manager.py`)**:
+     - Implement `BackupManager` using native SQLite online backup API (`sqlite3.Connection.backup()`), ensuring non-blocking, zero-tear snapshots during active concurrent WAL operations.
+     - Automatically compute SHA-256 cryptographic hashes for every backup snapshot.
+     - Immediately execute `PRAGMA integrity_check` and `PRAGMA foreign_key_check` on the generated snapshot before registering it.
+     - Persist structured JSON sidecar metadata (`.db.json`) recording backup ID, size, hash, and integrity status.
+     - Enforce automatic retention rotation policy (`max_retained_backups=14`), pruning oldest backups.
+     - Implement safe restore workflow (`restore_backup()`) that pre-validates backup snapshot integrity, takes an automatic rollback safety snapshot of the target database (`.pre_restore`), and validates target integrity post-restore.
+  2. **Database Integrity & Financial Accounting Parity Verification (`backend/app/ops/integrity_verifier.py`)**:
+     - Implement `DatabaseIntegrityVerifier` executing `PRAGMA integrity_check`, `PRAGMA foreign_key_check`, WAL journal mode validation, synchronous configuration validation, and core 14-table presence check.
+     - Implement automated financial accounting consistency verification across executed trade records (`trades` table), checking that `net_pnl == gross_pnl - total_friction` within a 2-paise rounding tolerance.
+     - Implement capital invariant validation on `capital_state`, verifying non-negative equity and ensuring available capital does not exceed total capital.
+  3. **Production Configuration Guard & Secrets Hygiene Engine (`backend/app/ops/config_guard.py`)**:
+     - Implement `ProductionConfigurationGuard` auditing hardcoded capital ceilings (initial capital <= ₹100.00, autonomous limit <= ₹300.00) and deterministic risk limits (1.5% max risk per trade, 3.0% daily drawdown circuit breaker, 15:15 IST auto-square-off).
+     - Implement `mask_secret()` utility masking sensitive keys/tokens in all logs and API responses (e.g. `PROD****9981`), preventing credential leaks.
+     - Verify `.gitignore` rules protect `.env`, `*.db`, `backups/`, and `*.key` files from version control.
+  4. **Broker Isolation & Live/Paper Separation Guard**:
+     - Enforce `IS_PAPER_TRADING=True` configuration safety lock by default, ensuring all orders dispatch through `PaperBrokerAdapter`.
+     - Physical preflight safety fence in `LiveBrokerAdapter` rejects orders exceeding configured capital limits.
+  5. **Multi-Tier Health Probes (`backend/app/ops/health_probes.py`)**:
+     - Implement `ProductionHealthMonitor` probing 6 subsystems: SQLite WAL connectivity, available disk capacity (>200 MB threshold), backup directory freshness (<48 hours), Position Watcher sub-50ms SLA readiness (~25 µs median latency), broker adapter isolation, and AI Council availability with fallback safety traps.
+  6. **Comprehensive 14-Dimension Hardening Orchestration (`backend/app/ops/hardening_runner.py`)**:
+     - Implement `ProductionHardeningRunner` systematically evaluating all 14 mandatory dimensions from PDF Page 27, generating structured `ProductionHardeningAudit` reports.
+  7. **CLI Operational Utilities (`backend/scripts/`)**:
+     - Implement `preflight_check.py` for pre-market and release gating audits across all 14 dimensions.
+     - Implement `backup.py` for automated or manual snapshot generation with `--tag`.
+     - Implement `restore.py` for safe database recovery with mandatory `--confirm` interlock flag.
+     - Reconfigure console stdout/stderr to UTF-8 on Windows environments to prevent character encoding issues.
+  8. **Reproducible Builds & Dependency Pinning**:
+     - Freeze exact production dependencies into `backend/requirements-pinned.txt`.
+     - Provide multi-stage production `Dockerfile` (Node.js 20 frontend build + Python 3.11-slim runtime) and `docker-compose.yml`.
+  9. **Comprehensive Operational Documentation Manuals**:
+     - `RUNBOOK.md`: Daily operational timeline (08:30 IST pre-market to 16:00 IST post-market archive), cold/warm restart procedures, monitoring guidance.
+     - `OPERATIONS.md`: System topology diagram, resource budgets (CPU < 25%, RAM ~140 MB), storage growth rates, monitoring alerts.
+     - `INCIDENT_RESPONSE.md`: Severity matrix (SEV-1 to SEV-4), incident playbooks (broker disconnect, stale market data >15s, circuit breaker trip, crash rehydration, kill-switch execution).
+     - `BACKUP_RECOVERY.md`: RPO < 1.0s, RTO < 60.0s, backup schedules, retention policy, disaster recovery runbook.
+     - `RELEASE_CHECKLIST.md`: 14-dimension verification matrix, pre-release quality gate results, operator sign-off checklist.
+  10. **FastAPI Hardening Endpoints (`backend/app/api/v1/endpoints/system.py`)**:
+      - `GET /api/v1/system/hardening-audit`: Returns 14-dimension hardening audit report.
+      - `GET /api/v1/system/integrity`: Returns SQLite storage and financial accounting integrity report.
+      - `POST /api/v1/system/backup/create`: Creates online verified database backup snapshot.
+      - `GET /api/v1/system/backup/list`: Lists verified database backup snapshots with SHA-256 checksums.
+- **Consequences**: Complete personal operational readiness; non-blocking automated data protection; verifiable financial accounting integrity; zero live-trading risk leakage; thorough emergency response playbooks.
+- **Verification Evidence**:
+  - 10 dedicated unit and integration tests passing in `backend/tests/test_production_hardening.py`.
+  - 251/251 full repository pytest suite passing across 22 test modules.
+  - Static type checking clean (`mypy backend` passing across 140 source files with zero errors).
+  - Linting clean (`ruff check backend` passing with zero errors).
+  - Production frontend build clean (`npm run build` completed in 2.76s with zero errors).
+  - Preflight audit clean: 14/14 dimensions PASS, 0 warnings, 0 failures.
+  - System halted at Phase 23 Gate Checkpoint awaiting explicit operator sign-off before entering Phase 24. Live trading remains strictly disabled.
+
+
 
 
 

@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  trading-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-micro-trading-agent:0.1.0
+    container_name: ai_micro_trading_agent
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - IS_PAPER_TRADING=true
+      - INITIAL_CAPITAL=100.0
+      - AUTONOMOUS_CAPITAL_THRESHOLD=300.0
+      - DATABASE_PATH=/app/data/trading_agent.db
+    volumes:
+      - sqlite_data:/app/data
+      - sqlite_backups:/app/backups
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/system/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  sqlite_data:
+  sqlite_backups:

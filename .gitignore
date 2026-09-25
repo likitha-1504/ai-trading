@@ -56,3 +56,7 @@ Thumbs.db
 .env.*.local
 credentials.json
 secrets/
+*.key
+backups/
+backups
+
