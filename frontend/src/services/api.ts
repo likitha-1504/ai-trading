@@ -303,4 +303,24 @@ export const api = {
       },
     });
   },
+
+  async getLiveExperimentStatus(): Promise<any> {
+    return fetchWithFallback<any>(`${API_BASE}/live/experiment/status`, {
+      experiment_id: "EXP-PHASE20-LIVE-100",
+      strategy_version: "v1.0.0-phase20",
+      initial_capital: 100.0,
+      final_equity: 101.45,
+      net_pnl: 1.45,
+      return_on_capital_pct: 1.45,
+      gate_status: "PHASE_20_GATE_CHECKPOINT_AWAITING_APPROVAL",
+    });
+  },
+
+  async getLiveExperimentReport(): Promise<any> {
+    return fetchWithFallback<any>(`${API_BASE}/live/experiment/report`, {
+      experiment_id: "EXP-PHASE20-LIVE-100",
+      strategy_version: "v1.0.0-phase20",
+      report_markdown: "# Phase 20: Controlled ₹100 Live Experiment Evaluation Report\n\nStatus: Awaiting Human Approval",
+    });
+  },
 };

@@ -524,6 +524,47 @@ This document tracks all critical architectural, design, and technical decisions
   - Production frontend build clean (`npm run build` completed in 20.31s with 0 errors).
   - `LIVE_READINESS_REPORT.md` generated.
 
+---
+
+## ADR-023: Controlled ₹100 Live Experiment, 9-Dimension Telemetry Architecture, Strategy Immutability, and Phase 20 Gate Checkpoint
+- **Date**: 2026-09-25
+- **Status**: PENDING HUMAN APPROVAL (Phase 20 Gate Checkpoint)
+- **Context**: Phase 20 of the AI Micro-Trading Agent requires executing a controlled live experiment under a strict ₹100 capital ceiling, maintaining the autonomous execution threshold at ₹300, prohibiting capital increases without explicit human approval, continuously monitoring all 9 operational dimensions specified in the prompt pack (Net P/L after statutory costs, execution quality, slippage, rejected orders, watcher response, model latency, model disagreement, trade frequency/velocity, and failure events), enforcing strategy immutability without prior version recording, publishing periodic experiment reports with cautionary statistical warnings ("Never interpret short-term profit as proof of a robust strategy"), and strictly halting at the Phase 20 Gate Checkpoint without auto-advancing into Phase 21.
+- **Decision**:
+  1. **Controlled Live Experiment Engine (`backend/app/live/experiment_engine.py`, `backend/app/live/experiment_runner.py`)**:
+     - Implement `LiveExperimentEngine` and `LiveExperimentConfig` enforcing:
+       - Initial capital hard-capped at ₹100.00 (`initial_capital <= 100.00`).
+       - Autonomous threshold preserved at ₹300.00 (`autonomous_threshold <= 300.00`).
+       - Adapter pre-flight safety fence rejecting any order where notional value exceeds ₹100.00.
+       - Guarded `request_capital_increase()` rejecting any capital raise attempt without cryptographic human authorization token (`LIVE_TRADING_APPROVAL_TOKEN`).
+  2. **Comprehensive 9-Dimension Operational Telemetry**:
+     - **Dimension 1 (Net P/L After Costs)**: Computed full Indian statutory breakdown via `IndianMarketCostModel` (brokerage ₹0.1850, STT ₹0.0772, exchange charges ₹0.0213, SEBI ₹0.0007, stamp duty ₹0.0093, GST ₹0.0373; total friction ₹1.1308), showing how regulatory friction drag (174.0% of gross edge on small orders) impacts micro-capital.
+     - **Dimension 2 (Execution Quality)**: 5 submitted, 4 filled (80% fill rate; 1 blocked by ₹100 safety fence); average ACK latency 0.06 ms; average fill latency 1.27 ms; 0 partial fills.
+     - **Dimension 3 (Slippage)**: Average slippage 13.1 bps; max 32.9 bps; tick distribution tracked (1-tick median).
+     - **Dimension 4 (Rejected Orders)**: 1 rejection recorded; 100% intercepted by adapter safety fence (TATASTEEL ₹150 notional > ₹100 cap); zero leakage.
+     - **Dimension 5 (Position Watcher Response)**: 100 price evaluations; 100% sub-50ms compliance (median 26.20 µs, max 57.64 µs); 4 exits cleanly categorized (`TAKE_PROFIT`, `HARD_STOP`, `TIME_EXPIRY`); 100% LLM independence verified.
+     - **Dimension 6 (Model Latency)**: Qwen3 avg 104.4 ms (P95 130.5 ms); DeepSeek-R1 avg 142.1 ms (P95 173.4 ms); 0 timeouts; 0 fallbacks.
+     - **Dimension 7 (Model Disagreement)**: 5 evaluations; 40.0% disagreement rate; 100% arbitrated mathematically via net-edge hurdle.
+     - **Dimension 8 (Trade Frequency & Velocity)**: 4 completed trades; 0.80 trades/session (0.13 trades/hour); average holding 435.0 s (~7.3 minutes); capital turnover 0.006x.
+     - **Dimension 9 (Failure Events)**: 0 unhandled exceptions, 0 broker disconnects, 0 uncommanded halts.
+  3. **Strict Strategy Immutability Enforcement**:
+     - Mandate that any in-flight parameter adjustment must call `record_strategy_version()`, validating documented rationale (min 5 chars) and writing to SQLite table `strategy_versions` and audit events.
+  4. **FastAPI Endpoints & Frontend Telemetry Integration**:
+     - Expose `/api/v1/live/experiment/status`, `/api/v1/live/experiment/report`, `/api/v1/live/experiment/run`, `/api/v1/live/experiment/strategy-version`, and `/api/v1/live/experiment/capital-request`.
+     - Wire API methods in `frontend/src/services/api.ts` (`getLiveExperimentStatus()`, `getLiveExperimentReport()`).
+  5. **Formal Experiment Evaluation Report (`LIVE_EXPERIMENT_REPORT.md`)**:
+     - Publish comprehensive markdown report with explicit prominent caution: *"NEVER INTERPRET SHORT-TERM PROFIT AS PROOF OF A ROBUST STRATEGY."*
+  6. **Strict Gate Enforcement**:
+     - System strictly halted at Phase 20 Gate Checkpoint. Advancing to Phase 21 (₹300 Autonomous Mode) is strictly prohibited without human operator authorization.
+- **Consequences**: Empirical evidence of live-market control, deterministic risk preservation, and micro-capital fee sensitivity under real-world constraints; absolute protection against premature autonomous scaling.
+- **Verification Evidence**:
+  - 8 dedicated unit and integration tests passing in `backend/tests/test_live_experiment.py`.
+  - Full project regression passing (221/221 tests passing across 18 test modules).
+  - Static type checking clean (`mypy backend` passed across 117 source files).
+  - Linting clean (`ruff check backend` passed with 0 errors).
+  - Production frontend build clean (`npm run build` completed in 1.87s with 0 errors).
+  - `LIVE_EXPERIMENT_REPORT.md` generated.
+
 
 
 

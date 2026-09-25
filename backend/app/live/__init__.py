@@ -1,5 +1,21 @@
-"""Live trading readiness, safety gate audits, and controlled transition controls."""
+"""Live trading readiness, controlled live experiments, safety gates, and transition controls."""
 
+from app.live.experiment_engine import (
+    ExecutionQualityMetrics,
+    FailureEventsMetrics,
+    LiveExperimentConfig,
+    LiveExperimentEngine,
+    LiveExperimentResult,
+    LiveExperimentSecurityError,
+    ModelDisagreementMetrics,
+    ModelLatencyMetrics,
+    NetPnLMetrics,
+    RejectedOrdersMetrics,
+    SlippageMetrics,
+    StrategyVersionAudit,
+    TradeFrequencyMetrics,
+    WatcherResponseMetrics,
+)
 from app.live.readiness_audit import (
     ApprovalGateReport,
     BrokerConnectionReport,
@@ -14,8 +30,22 @@ __all__ = [
     "ApprovalGateReport",
     "BrokerConnectionReport",
     "CredentialAuditReport",
+    "ExecutionQualityMetrics",
+    "FailureEventsMetrics",
+    "LiveExperimentConfig",
+    "LiveExperimentEngine",
+    "LiveExperimentResult",
+    "LiveExperimentSecurityError",
     "LiveReadinessAuditResult",
     "LiveReadinessAuditor",
+    "ModelDisagreementMetrics",
+    "ModelLatencyMetrics",
+    "NetPnLMetrics",
     "PreflightCheckItem",
+    "RejectedOrdersMetrics",
     "SafetySystemsReport",
+    "SlippageMetrics",
+    "StrategyVersionAudit",
+    "TradeFrequencyMetrics",
+    "WatcherResponseMetrics",
 ]

@@ -289,14 +289,30 @@ Status Key:
   - [x] Implement guarded live mode switch API endpoint (`POST /api/v1/system/mode`, `GET /api/v1/system/live-readiness`)
   - [x] Add frontend live-readiness query method and terminal render guard (`frontend/src/services/api.ts`, `frontend/src/components/ui/ErrorBoundary.tsx`)
   - [x] Run full automated test regression and static checks (213/213 pytest passed, ruff clean, mypy clean, Vite build clean)
-- [!] Phase 19 Gate Checkpoint: Explicit Human Approval Gate (MANDATORY GATE CHECKPOINT REACHED - System halted awaiting human authorization before Phase 20)
+- [x] Phase 19 Gate Checkpoint: Explicit Human Approval Gate (APPROVED by User for Phase 20 Continuation)
 
 ---
 
-## Phase 20: ₹100 Controlled Live Experiment
-- [ ] Execute live trading under strict ₹100 capital ceiling
-- [ ] Monitor net P/L after taxes/brokerage and model latencies
-- [!] Phase 20 Experiment Evaluation
+## Phase 20: Controlled ₹100 Live Experiment
+- [x] Execute live trading under strict ₹100 capital ceiling (`backend/app/live/experiment_engine.py`, `backend/app/live/experiment_runner.py`)
+  - [x] Initial capital ₹100.00 strictly capped with zero increases permitted without verified human approval token
+  - [x] Autonomous threshold preserved at ₹300.00
+  - [x] Pre-flight adapter safety fence strictly rejects orders exceeding ₹100 notional (e.g. TATASTEEL ₹150.00 blocked)
+- [x] Monitor and audit all 9 required operational dimensions from prompt pack:
+  - [x] Dimension 1: Net P/L after statutory costs (brokerage, STT, exchange charges, SEBI fees, stamp duty, GST; friction drag ratio tracked)
+  - [x] Dimension 2: Execution quality (fill rates, ACK latency <50ms, fill latency <100ms, zero partial fills)
+  - [x] Dimension 3: Slippage (expected vs executed prices, tick slippage distribution, zero/adverse breakdown)
+  - [x] Dimension 4: Rejected orders (rejection reasons, capital cap safety fence rejections)
+  - [x] Dimension 5: Position Watcher response (sub-50ms SLA 100% compliant, median ~26 µs, exits: take profit, hard stop, time cutoff; 100% LLM independence)
+  - [x] Dimension 6: AI Model latency (Qwen3 analyst and DeepSeek-R1 challenger average/P95 latencies, zero timeouts, zero unhandled fallbacks)
+  - [x] Dimension 7: AI Model disagreement (unanimous vs contested rates, deterministic mathematical arbitration via net-edge hurdle)
+  - [x] Dimension 8: Trade frequency & capital velocity (trades/session, trades/hour, holding duration, max concurrent positions, turnover velocity)
+  - [x] Dimension 9: Failure events & anomaly handling (broker disconnects, stale quote alerts, circuit breaker trips, kill-switch invocations, zero unhandled exceptions)
+- [x] Enforce strategy immutability (no live optimization without recording version and reason in SQLite audit trail)
+- [x] Integrate Phase 20 FastAPI endpoints (`/api/v1/live/experiment/status`, `/api/v1/live/experiment/report`, `/api/v1/live/experiment/run`, `/api/v1/live/experiment/strategy-version`, `/api/v1/live/experiment/capital-request`) and frontend service bindings
+- [x] Produce comprehensive Controlled ₹100 Live Experiment Evaluation Report (`LIVE_EXPERIMENT_REPORT.md`) with explicit statistical cautionary warning: "Never interpret short-term profit as proof of a robust strategy"
+- [x] Run full test regression and static checks (221/221 pytest passed across 18 test modules, ruff clean, mypy clean, Vite build clean)
+- [!] Phase 20 Gate Checkpoint: Controlled ₹100 Live Experiment Evaluation (MANDATORY GATE CHECKPOINT REACHED - System strictly halted awaiting explicit operator sign-off before entering Phase 21)
 
 ---
 
