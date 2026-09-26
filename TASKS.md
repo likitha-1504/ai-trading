@@ -644,5 +644,43 @@ Status Key:
   - [x] Static linting passing with zero errors (`ruff check backend/`)
   - [x] Production frontend build passing (`tsc -b && vite build` in <2.0s)
   - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
-- [!] Phase 28 Gate Checkpoint: AI Learning & Evaluation Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 28 complete. Execution halted before Phase 29 Controlled Capital Scaling. Awaiting explicit user approval.)
+- [x] Phase 28 Gate Checkpoint: AI Learning & Evaluation Sign-Off (Approved via explicit user instruction)
+
+## Phase 29: Controlled Capital Scaling & Stage Transitions (Current Phase)
+- [x] Capital Scaling Data Models & Schemas (`backend/app/capital_scaling/models.py`):
+  - [x] Discrete stages: `STAGE_1_MICRO` (INR 100), `STAGE_2_EXPLORATORY` (INR 300), `STAGE_3_SCALED` (INR 500), `STAGE_4_PRODUCTION_STANDARD` (INR 1,000)
+  - [x] Stage definitions with capital cap, max trades per day, max single loss, and require operator approval
+  - [x] Dual-ledger reconciliation check model with cash discrepancy tracking
+  - [x] Scaled transition record model with stage diffs, metrics, and audit timestamps
+  - [x] Scaling eligibility evaluator model with blocker diagnostics
+  - [x] Custom security error `UnauthorizedCapitalEscalationError`
+- [x] Controlled Capital Scaling Manager (`backend/app/capital_scaling/scaling_manager.py`):
+  - [x] Anti-auto-scaling governance: Rejects escalation without valid `OPERATOR-STAGE-TRANSITION-*` token
+  - [x] Winning streak defense: Escalation strictly prohibited based on automated performance metrics
+  - [x] Dual-ledger pre-transition and post-transition cash reconciliation (zero tolerance INR 0.00 discrepancy)
+  - [x] Atomic defensive rollback (`rollback_to_stage`) requiring `OPERATOR-STAGE-ROLLBACK-*` token
+  - [x] Complete scaling summary generator and transition history audit log
+- [x] Capital Scaling Package exports (`backend/app/capital_scaling/__init__.py`)
+- [x] FastAPI REST Endpoints (`backend/app/api/v1/endpoints/capital_scaling.py`):
+  - [x] `GET /api/v1/capital-scaling/summary`
+  - [x] `GET /api/v1/capital-scaling/stages`
+  - [x] `GET /api/v1/capital-scaling/eligibility`
+  - [x] `GET /api/v1/capital-scaling/history`
+  - [x] `POST /api/v1/capital-scaling/transition`
+  - [x] `POST /api/v1/capital-scaling/rollback`
+- [x] Router integration (`backend/app/api/v1/router.py`)
+- [x] Operational CLI runner & audit tool (`backend/scripts/capital_scaling_runner.py`):
+  - [x] ASCII multi-stage audit summary report
+  - [x] Structured JSON streaming (`--json`)
+  - [x] Stage transition eligibility check (`--check-eligibility`)
+- [x] Technical documentation (`docs/trading/controlled_capital_scaling.md`)
+- [x] Architecture Decision Record (`ADR-033` recorded in `DECISIONS.md`)
+- [x] Full quality gates & test regression:
+  - [x] 12/12 dedicated Phase 29 tests passing (`backend/tests/test_controlled_capital_scaling.py`)
+  - [x] 323/323 full repository regression tests passing across 27 test modules
+  - [x] Static type checking passing with zero errors (`mypy backend/app` across 133 source files)
+  - [x] Static linting passing with zero errors (`ruff check backend/`)
+  - [x] Production frontend build passing (`tsc -b && vite build` in 1.87s)
+  - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
+- [!] Phase 29 Gate Checkpoint: Controlled Capital Scaling Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 29 complete. Execution halted before Phase 30 Advanced Market Intelligence. Awaiting explicit user approval.)
 

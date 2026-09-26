@@ -888,6 +888,29 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit passing 14/14 dimensions.
   - Frontend production build compiling cleanly in <2.0s.
 
+---
+
+## ADR-033: Phase 29 Controlled Capital Scaling, Reconciled Stage Transitions, and Anti-Auto-Scaling Governance
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 29 Checkpoint Complete; Halted Before Phase 30)
+- **Context**: Transitioning from Phase 28 (AI Learning & Evaluation) to Phase 29 (Controlled Capital Scaling) requires formalizing discrete capital stages, ensuring atomic rollback capabilities, enforcing pre/post-transition accounting reconciliation, and guaranteeing that **capital is never automatically increased from recent performance or winning streaks**.
+- **Decision**:
+  1. **Discrete Capital Stages**: Formalize four explicit tiers: `STAGE_1_MICRO` (INR 100), `STAGE_2_EXPLORATORY` (INR 300), `STAGE_3_SCALED` (INR 500), and `STAGE_4_PRODUCTION_STANDARD` (INR 1000).
+  2. **Absolute Anti-Auto-Scaling Governance**: Prohibit programmatic escalation based on recent PnL or win streaks. Every stage change requires an explicit, cryptographic operator token (`OPERATOR-STAGE-TRANSITION-*`).
+  3. **Mandatory Dual-Stage Reconciliation**: Perform accounting audits immediately before and after transitions; abort if broker cash and SQLite WAL ledger discrepancy $> \text{INR } 0.00$.
+  4. **Atomic Rollback Architecture**: Implement sub-millisecond atomic rollback (`rollback_to_stage()`) to defensive baseline upon operator command (`OPERATOR-STAGE-ROLLBACK-*`).
+  5. **Telemetry & Tooling**: Expose dedicated REST API endpoints under `/api/v1/capital-scaling/*` and CLI audit runner `backend/scripts/capital_scaling_runner.py`.
+  6. **Halt Execution**: Stop strictly at Phase 29 Checkpoint before Phase 30 Advanced Market Intelligence.
+- **Consequences**: Mathematically bounded financial risk, elimination of runaway self-scaling hazards, guaranteed accounting parity, and rapid defensive retreat capabilities.
+- **Verification Evidence**:
+  - 12/12 dedicated Phase 29 tests passing.
+  - 323/323 full repository regression tests passing across 27 test modules.
+  - Mypy clean across 133 source files.
+  - Ruff clean across all Python source code.
+  - Preflight audit passing 14/14 dimensions.
+  - Frontend production build compiling cleanly in <2.0s.
+
+
 
 
 
