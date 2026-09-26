@@ -5,10 +5,53 @@ description: Run relevant tests, record evidence, and never declare success with
 
 # Test and Verify Skill
 
-This skill governs verification gates and test execution for `ai-agent-trading`.
+This skill governs testing execution, evidence gathering, and verification gates across the `ai-agent-trading` lifecycle.
 
-## Principles
-1. **Never Declare Success Without Verification**: Every modification must be validated by running tests and recording evidence.
-2. **Full Regression Integrity**: Ensure all 251+ tests in `backend/tests/` pass with zero failures.
-3. **Static Quality Verification**: Run `mypy backend/app` and `ruff check backend/`.
-4. **Preflight Operational Check**: Execute `python backend/scripts/preflight_check.py` to ensure all 14 operational dimensions pass.
+---
+
+## 1. Prime Directive: Never Declare Success Without Verification
+- No task, feature, bug fix, or release may be declared complete without executing automated tests and capturing the output evidence in task summaries.
+- If a test fails, execution stops immediately. The failure must be diagnosed and resolved before any downstream phase begins.
+
+---
+
+## 2. Verification Levels
+
+### Level 1: Unit & Component Verification
+Run tests specific to modified modules:
+```bash
+pytest backend/tests/test_feature_engine.py -v
+pytest backend/tests/test_strategies.py -v
+```
+
+### Level 2: Full Repository Regression (251 Tests)
+Mandatory before creating commits or merging branches:
+```bash
+pytest
+```
+Expected output: `251 passed, 1 warning in <45s`
+
+### Level 3: Static Code Quality Checks
+Verify Python typing and PEP 8 conformance:
+```bash
+mypy backend/app
+ruff check backend/
+```
+Expected output:
+- `Success: no issues found in 114 source files`
+- `All checks passed!`
+
+### Level 4: Frontend Compilation Check
+Verify TypeScript type checking and production bundling:
+```bash
+cd frontend
+npm run build
+```
+Expected output: `✓ built in <3.0s` with zero TypeScript errors.
+
+### Level 5: 14-Dimension Operational Preflight Audit
+Verify database integrity, backup readiness, configuration hard caps, and health probes:
+```bash
+python backend/scripts/preflight_check.py
+```
+Expected output: `Status: ALL PASSED (14/14)` with 0 warnings and 0 failures.
