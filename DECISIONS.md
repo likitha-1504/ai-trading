@@ -1083,3 +1083,23 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit passing 14/14 dimensions.
   - Frontend production build clean.
 
+---
+
+## ADR-041: Phase 37 Long-Term Autonomous System, Dynamic Strategy Portfolio Governance, and Explicit Human Release Gates
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 37 Gate Checkpoint)
+- **Context**: Long-term autonomous operation requires expanding automation across multiple trading days and dynamically managing a multi-strategy portfolio. However, unconstrained autonomy risks strategy drift, silent parameter mutations, and capital loss. Rigorous post-V1 control rules dictate that broader automation must only occur after earlier phases are validated and must preserve explicit release gates and human approval tokens.
+- **Decision**:
+  1. **Multi-Phase Prerequisite Verification Gate (`LongTermPrerequisiteGate`)**: Rigidly audits all 7 prerequisite dimensions across earlier phases (Phase 25 Operational Health, Phase 29 Capital Limits, Phase 31 Multi-Strategy Concentration, Phase 33 Disaster Recovery, Phase 34 Cryptographic RBAC Security, Phase 35 Research Sandbox, Phase 36 Council Evolution). Long-term autonomous operation is strictly blocked if any prerequisite fails.
+  2. **Dynamic Strategy Portfolio Governance (`AutonomousPortfolioGovernor`)**: Governs strategy lifecycle transitions (`RESEARCH` -> `CANDIDATE` -> `PROBATION` -> `ACTIVE` -> `DEGRADED` -> `DECOMMISSIONED`). Continuously tracks rolling performance (win rate, Sharpe, drawdown, consecutive losses). Automatically quarantines and demotes degraded strategies (drawdown > 15%, win rate < 40%, or $\ge 4$ consecutive losses) and freezes capital allocations.
+  3. **Governed Dynamic Rebalancing**: Generates empirical rebalance proposals (`EQUAL_WEIGHT`, `SHARPE_WEIGHTED`) strictly bounded by Phase 31 concentration limits (gross $\le 100\%$, strategy $\le 60\%$, symbol $\le 40\%$, sector $\le 50\%$). Application strictly requires an explicit operator release token.
+  4. **Explicit Release Gates & Human Approval Protocol (`AutonomousReleaseGate`)**: All critical mutations (session activation, strategy promotion, portfolio rebalancing, capital tier scaling, safety resets) require verified, non-silent operator release tokens (`RELEASE-*` / HMAC signed). Replay prevention and tamper-evident SHA-256 ledger recording are enforced.
+  5. **End-to-End Autonomous Lifecycle Orchestration (`LongTermAutonomousOrchestrator`)**: Coordinates full operational lifecycle: Pre-market audit -> Session activation -> Intraday loop with sub-50ms position watcher SLA and 3.0% drawdown circuit breaker -> Mandatory 15:15 IST auto-square-off -> Post-market reconciliation and cryptographic archival.
+  6. **Zero Live Trading**: Autonomous execution remains hard-locked to paper trading mode (`IS_PAPER_TRADING=True`).
+- **Consequences**: Enables sustainable, multi-session autonomous operation with dynamic risk-aware multi-strategy portfolio management, while guaranteeing mathematical bounds, zero silent actions, and immutable cryptographic auditability.
+- **Verification Evidence**:
+  - Dedicated tests passing in `backend/tests/test_long_term_autonomous_system.py`.
+  - Static type checking clean (`mypy backend/app`).
+  - Linter clean (`ruff check backend/`).
+  - Preflight operational audit passing 14/14 dimensions.
+

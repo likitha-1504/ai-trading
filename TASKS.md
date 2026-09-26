@@ -1066,7 +1066,61 @@ Status Key:
   - [x] Static linting passing with zero errors (`ruff check backend/`)
   - [x] Production frontend build passing (`tsc -b && vite build` in 1.91s)
   - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
-- [!] Phase 36 Gate Checkpoint: AI Council Evolution & Safety Decoupling Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 36 complete. Execution halted before Phase 37 Long-Term Autonomous System. Awaiting explicit user approval.)
+- [x] Phase 36 Gate Checkpoint: AI Council Evolution & Safety Decoupling Sign-Off (Approved via explicit user instruction)
 
-
-
+## Phase 37: Long-Term Autonomous System, Dynamic Strategy Portfolio Governance, and Explicit Human Release Gates (Completed)
+- [x] Long-Term Autonomous Models & Schemas (`backend/app/long_term_autonomous/models.py`):
+  - [x] Full operational lifecycle state machine (`OFFLINE`, `PRE_MARKET_AUDIT`, `ACTIVE_AUTONOMOUS`, `PAUSED_CIRCUIT_BREAKER`, `INTRADAY_CUTOFF`, `POST_MARKET_RECONCILIATION`, `SESSION_ARCHIVED`, `EMERGENCY_HALT`)
+  - [x] Strategy portfolio lifecycle stages (`RESEARCH`, `CANDIDATE`, `PROBATION`, `ACTIVE`, `DEGRADED`, `DECOMMISSIONED`)
+  - [x] Release gate types (`SYSTEM_ACTIVATION`, `STRATEGY_PROMOTION`, `PORTFOLIO_REBALANCE`, `CAPITAL_TIER_SCALE`, `SAFETY_RESET`)
+  - [x] Multi-phase prerequisite dimensions (`OPS_PREFLIGHT`, `CAPITAL_LIMITS`, `PORTFOLIO_CONCENTRATION`, `DISASTER_RECOVERY`, `SECURITY_LEAST_PRIVILEGE`, `RESEARCH_SANDBOX`, `AI_COUNCIL_DECOUPLING`)
+  - [x] Dynamic rebalance proposals, release requests/decisions, and daily session summaries
+- [x] Multi-Phase Prerequisite Gate (`backend/app/long_term_autonomous/prerequisite_gate.py`):
+  - [x] Comprehensive 7-dimensional audit across earlier post-V1 phases (Phases 21–36)
+  - [x] Strict blocking (`PrerequisiteNotMetError`) when foundational invariants are unverified
+  - [x] Tamper-evident audit logging of prerequisite checks
+- [x] Explicit Human Release Gate Engine (`backend/app/long_term_autonomous/release_gate.py`):
+  - [x] Cryptographic verification and nonce replay prevention
+  - [x] Role-based least privilege enforcement (`OPERATOR` / `ADMIN`)
+  - [x] Non-silent token enforcement (`RELEASE-*`) for state activations, promotions, and rebalancing
+  - [x] SHA-256 hash-chain ledger recording for every release decision
+- [x] Dynamic Strategy Portfolio Governor (`backend/app/long_term_autonomous/portfolio_governor.py`):
+  - [x] Multi-strategy lifecycle management across baseline and candidate strategies
+  - [x] Rolling performance tracking (win rate, Sharpe, drawdown, consecutive losses)
+  - [x] Automated edge degradation quarantine (drawdown > 15%, win rate < 40%, or >= 4 consecutive losses demotes to `DEGRADED`, freezes capital)
+  - [x] Dynamic rebalancing engine (`EQUAL_WEIGHT`, `SHARPE_WEIGHTED`) respecting Phase 31 concentration limits (60% max strategy cap)
+  - [x] Release-gated promotion protocol (`CANDIDATE` -> `PROBATION` -> `ACTIVE`)
+- [x] Autonomous Lifecycle Orchestrator (`backend/app/long_term_autonomous/lifecycle_orchestrator.py`):
+  - [x] Pre-market audit, DB WAL verification, and state rehydration
+  - [x] Release-gated session activation into `ACTIVE_AUTONOMOUS`
+  - [x] Intraday execution loop with independent sub-50ms position watcher SLA
+  - [x] Runtime circuit breakers (3.0% daily drawdown, 3 consecutive losses)
+  - [x] Mandatory 15:15 IST intraday auto-square-off of open positions
+  - [x] Post-market PnL reconciliation, cryptographic chain verification, and session archival
+- [x] Package export interface (`backend/app/long_term_autonomous/__init__.py`)
+- [x] FastAPI REST endpoints (`backend/app/api/v1/endpoints/long_term_autonomous.py`):
+  - [x] `GET /api/v1/long-term-autonomous/status`
+  - [x] `POST /api/v1/long-term-autonomous/prerequisites/verify`
+  - [x] `POST /api/v1/long-term-autonomous/session/start`
+  - [x] `POST /api/v1/long-term-autonomous/session/cutoff`
+  - [x] `POST /api/v1/long-term-autonomous/session/reconcile`
+  - [x] `POST /api/v1/long-term-autonomous/portfolio/rebalance/propose`
+  - [x] `POST /api/v1/long-term-autonomous/portfolio/rebalance/apply`
+  - [x] `POST /api/v1/long-term-autonomous/release-gate/evaluate`
+  - [x] `POST /api/v1/long-term-autonomous/safety/reset`
+- [x] Master Router mounting (`backend/app/api/v1/router.py`)
+- [x] Operational CLI runner & lifecycle tool (`backend/scripts/long_term_autonomous_runner.py`):
+  - [x] Overall system status (`--status`)
+  - [x] Prerequisite audit (`--check-prerequisites`)
+  - [x] Full session lifecycle simulation (`--run-session`, `--token`)
+  - [x] Dynamic portfolio rebalance (`--rebalance`, `--token`)
+  - [x] Release token evaluation (`--verify-release`)
+  - [x] Structured JSON streaming (`--json`)
+- [x] Operational documentation & manual (`docs/autonomous/long_term_system.md`)
+- [x] Architecture Decision Record (`ADR-041` recorded in `DECISIONS.md`)
+- [x] Full quality gates & test regression:
+  - [x] Dedicated Phase 37 tests passing (`backend/tests/test_long_term_autonomous_system.py`)
+  - [x] Static type checking passing with zero errors (`mypy backend/app`)
+  - [x] Static linting passing with zero errors (`ruff check backend/`)
+  - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
+- [!] Phase 37 Gate Checkpoint: Long-Term Autonomous System Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 37 complete. Execution halted. Awaiting explicit user approval.)
