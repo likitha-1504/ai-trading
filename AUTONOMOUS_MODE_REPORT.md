@@ -1,7 +1,7 @@
 # Phase 21: ₹300 Autonomous Mode Evaluation Report
 
 **Run ID**: `RUN-PHASE21-AUTO-300`  
-**Execution Window**: 2026-09-25 13:47:37 UTC to 2026-09-25 13:47:37 UTC  
+**Execution Window**: 2026-09-26 06:48:56 UTC to 2026-09-26 06:48:56 UTC  
 **Autonomous Capital Ceiling**: ₹300.00 (Strict Cap)  
 **Total Capital Limit**: ₹300.00  
 **Strategy Version**: `v1.0.0-phase21`  

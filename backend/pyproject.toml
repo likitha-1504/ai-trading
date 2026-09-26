@@ -1,6 +1,6 @@
 [project]
 name = "ai-micro-trading-agent"
-version = "0.1.0"
+version = "1.0.0"
 description = "Local-first AI Micro-Trading Agent with Deterministic Safety & Dual-LLM Reasoning"
 readme = "README.md"
 requires-python = ">=3.11"
