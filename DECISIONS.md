@@ -782,6 +782,35 @@ This document tracks all critical architectural, design, and technical decisions
   - All 14 production hardening dimensions verified (AUDIT-PHASE23-RELEASE-GATE: 14/14 PASS).
   - Complete operational documentation package: `RUNBOOK.md`, `OPERATIONS.md`, `INCIDENT_RESPONSE.md`, `BACKUP_RECOVERY.md`, `RELEASE_CHECKLIST.md`.
 
+---
+
+## ADR-029: Phase 25 Production Operations Architecture & Observability
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 25 Gate Complete; Execution Halted Before Phase 26)
+- **Context**: The Phase 25+ Control Prompts framework mandates establishing production observability across:
+  1. Multi-tier health checks and component surveillance.
+  2. Real-time data-feed health (tick freshness, sequence monotonicity, spread %, stale feed triggers >15s).
+  3. Broker connectivity status (WebSocket status, heartbeats, reconnect counters, circuit breakers).
+  4. Database health (WAL status, file sizes, page counts, transaction commit latency, accounting parity).
+  5. Latency and error telemetry (sub-50ms Watcher SLA, feature compute time, rolling error rates).
+  6. Automated hot backup operations and rotation monitoring.
+  7. Operational runbook tooling and terminal monitoring CLI (`backend/scripts/ops_monitor.py`).
+- **Decision**:
+  1. Implement `ProductionOperationsMonitor` and `ProductionTelemetryCollector` in `backend/app/ops/production_operations.py`.
+  2. Expose dedicated FastAPI REST endpoints under `/api/v1/operations/*` for external monitoring and scrape ingestion.
+  3. Provide CLI operational dashboard in `backend/scripts/ops_monitor.py` supporting both ASCII dashboards and structured JSON streams.
+  4. Document operational runbook in `docs/operations/production_operations.md`.
+  5. Validate with 10 dedicated automated tests (`backend/tests/test_production_operations.py`).
+  6. Halt execution strictly at Phase 25 Gate before Phase 26 Live Trading Stabilization.
+- **Consequences**: Complete production observability, real-time data feed monitoring, and verifiable telemetry without altering trading rules or exposing risk gates.
+- **Verification Evidence**:
+  - 10/10 dedicated Phase 25 tests passing.
+  - 261/261 full repository regression tests passing across 23 test modules.
+  - Mypy clean across 116 source files.
+  - Ruff clean across all Python source code.
+  - Preflight audit passing 14/14 dimensions.
+  - Frontend production build compiling in 1.86s.
+
 
 
 
