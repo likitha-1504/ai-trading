@@ -738,5 +738,48 @@ Status Key:
   - [x] Static linting passing with zero errors (`ruff check backend/`)
   - [x] Production frontend build passing (`tsc -b && vite build` in 2.39s)
   - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
-- [!] Phase 30 Gate Checkpoint: Advanced Market Intelligence Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 30 complete. Execution halted before Phase 31 Multi-Strategy Portfolio. Awaiting explicit user approval.)
+- [x] Phase 30 Gate Checkpoint: Advanced Market Intelligence Sign-Off (Approved via explicit user instruction)
+
+## Phase 31: Multi-Strategy Portfolio & Concentration Governance (Current Phase)
+- [x] Multi-Strategy Portfolio Data Models & Schemas (`backend/app/portfolio/models.py`):
+  - [x] Independent strategy validation schemas and status states (`VALIDATED`, `PROBATION`, `DISQUALIFIED`)
+  - [x] Deterministic allocation methods (`EQUAL_WEIGHT`, `RISK_PARITY_VOLATILITY`, `PERFORMANCE_SHARPE`, `MANUAL_OPERATOR`)
+  - [x] Strategy allocation state tracking target weight, allocated INR, deployed INR, and available INR
+  - [x] Concentration limits: gross exposure cap (100%), strategy cap (60%), symbol cap (40%), sector cap (50%)
+  - [x] Cross-sectional concentration telemetry and violation detection
+  - [x] Reallocation request schema with mandatory `OPERATOR-PORTFOLIO-REALLOC-*` authorization token
+- [x] Independent Strategy Validator (`backend/app/portfolio/strategy_validator.py`):
+  - [x] Enforces core rule: "Add strategy allocation only after independent validation"
+  - [x] Validates strategies against 5 quantitative criteria: sample size (>=15), win rate (>=50%), profit factor (>=1.20), Sharpe (>=0.50), max DD (<=20%)
+  - [x] Automatic disqualification and allocation zeroing for underperforming strategies
+- [x] Deterministic Concentration & Exposure Engine (`backend/app/portfolio/concentration_engine.py`):
+  - [x] Enforces core rule: "Deterministic portfolio risk controls exposure and concentration"
+  - [x] Pre-trade admission evaluation against gross, strategy, symbol, and sector limits
+  - [x] Cross-sectional concentration metrics calculation
+- [x] Multi-Strategy Portfolio Manager (`backend/app/portfolio/portfolio_manager.py`):
+  - [x] Manages strategy capital allocations and dynamic rebalancing
+  - [x] Atomically allocates and releases capital with realized PnL accounting
+  - [x] Operator-authorized rebalancing governance
+- [x] Package exports (`backend/app/portfolio/__init__.py`)
+- [x] FastAPI REST Endpoints (`backend/app/api/v1/endpoints/portfolio.py`):
+  - [x] `GET /api/v1/portfolio/summary`
+  - [x] `GET /api/v1/portfolio/strategies`
+  - [x] `GET /api/v1/portfolio/concentrations`
+  - [x] `POST /api/v1/portfolio/reallocate`
+  - [x] `POST /api/v1/portfolio/validate-strategy`
+- [x] Router integration (`backend/app/api/v1/router.py`)
+- [x] Operational CLI runner & audit tool (`backend/scripts/portfolio_runner.py`):
+  - [x] Formatted ASCII multi-strategy audit dashboard
+  - [x] Structured JSON streaming (`--json`)
+  - [x] Standalone strategy validation audit (`--validate`)
+- [x] Technical documentation (`docs/trading/multi_strategy_portfolio.md`)
+- [x] Architecture Decision Record (`ADR-035` recorded in `DECISIONS.md`)
+- [x] Full quality gates & test regression:
+  - [x] 16/16 dedicated Phase 31 tests passing (`backend/tests/test_multi_strategy_portfolio.py`)
+  - [x] 356/356 full repository regression tests passing across 29 test modules
+  - [x] Static type checking passing with zero errors (`mypy backend/app` across 148 source files)
+  - [x] Static linting passing with zero errors (`ruff check backend/`)
+  - [x] Production frontend build passing (`tsc -b && vite build` in 3.98s)
+  - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
+- [!] Phase 31 Gate Checkpoint: Multi-Strategy Portfolio Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 31 complete. Execution halted before Phase 32 Execution Optimization. Awaiting explicit user approval.)
 

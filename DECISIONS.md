@@ -934,6 +934,33 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit passing 14/14 dimensions.
   - Frontend production build clean.
 
+---
+
+## ADR-035: Phase 31 Multi-Strategy Portfolio Allocation, Independent Strategy Validation, and Deterministic Concentration Governance
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 31 Checkpoint Complete; Halted Before Phase 32)
+- **Context**: Transitioning to Phase 31 requires establishing a multi-strategy portfolio framework that enforces two inviolable principles: (1) Add strategy allocation only after independent validation, and (2) Deterministic portfolio risk controls exposure and concentration.
+- **Decision**:
+  1. **Independent Strategy Validation Gate (`StrategyValidator`)**: Mandate that any strategy must independently satisfy 5 criteria (>= 15 trades, >= 50% win rate, >= 1.20 profit factor, >= 0.50 Sharpe, <= 20% max DD) before receiving any non-zero capital allocation.
+  2. **Deterministic Concentration & Exposure Engine (`ConcentrationEngine`)**: Enforce hard mathematical bounds prior to admitting any trade:
+     - Gross portfolio exposure cap: <= 100.0%
+     - Single-strategy concentration ceiling: <= 60.0%
+     - Single-symbol concentration ceiling: <= 40.0%
+     - Single-sector concentration ceiling: <= 50.0%
+  3. **Multi-Strategy Capital Management (`MultiStrategyPortfolioManager`)**: Coordinate strategy capital allocations, track deployed margins, enforce available strategy cash caps, and release capital with realized PnL accounting.
+  4. **Operator Rebalancing Authorization**: Require explicit operator authorization (`OPERATOR-PORTFOLIO-REALLOC-*`) for target weight reallocations; reject any reallocation granting capital to unvalidated strategies.
+  5. **Telemetry & Tooling**: Expose dedicated REST API endpoints under `/api/v1/portfolio/*` and CLI audit runner `backend/scripts/portfolio_runner.py`.
+  6. **Halt Execution**: Stop strictly at Phase 31 Checkpoint before Phase 32 Execution Optimization.
+- **Consequences**: Protection against catastrophic single-strategy or single-symbol blowups, mathematically bounded cross-sectional exposure, guaranteed independent validation before capital commitment, and disciplined multi-strategy scaling.
+- **Verification Evidence**:
+  - Dedicated Phase 31 tests passing in `backend/tests/test_multi_strategy_portfolio.py`.
+  - Full repository regression tests passing across all test modules.
+  - Mypy clean across backend source files.
+  - Ruff clean across all Python source code.
+  - Preflight audit passing 14/14 dimensions.
+  - Frontend production build clean.
+
+
 
 
 
