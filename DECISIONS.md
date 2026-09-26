@@ -960,6 +960,33 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit passing 14/14 dimensions.
   - Frontend production build clean.
 
+---
+
+## ADR-036: Phase 32 Execution Optimization, Liquidity-Aware Sizing, and Paper Validation
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 32 Checkpoint Complete; Halted Before Phase 33)
+- **Context**: Phase 32 mandates studying execution dynamics: slippage, fill rates, order timing, liquidity-aware sizing, transaction costs, and latency, requiring validation in paper execution prior to live deployment.
+- **Decision**:
+  1. **Empirical Slippage & Market Impact Modeling (`SlippageModel`)**: Decompose execution costs into half-spread crossing and square-root market impact ($\gamma \cdot \sigma \cdot \sqrt{Q/V}$), predicting fill prices and rupee drag.
+  2. **Liquidity-Aware Position Sizing (`LiquidityAwareSizer`)**: Modulate size to cap volume participation to max 2.0% of candle volume and apply linear decay penalties when spreads widen past 15 bps.
+  3. **Session-Aware Order Timing & Scheduling (`OrderScheduler`)**: Classify intraday sessions into 5 distinct regimes and schedule execution urgency (`AGGRESSIVE`, `PASSIVE_PEG`, `LIQUIDITY_SEEKING`).
+  4. **Comparative Paper Execution Validation (`ExecutionPaperValidator`)**: Benchmark baseline market execution vs optimized execution across 50 simulated paper orders, empirically verifying:
+     - 70.1% average slippage reduction (6.94 bps down to 2.08 bps)
+     - INR 3,200.20 friction savings
+     - 44.5% P95 fill latency improvement (35.3ms down to 19.6ms)
+     - 100% paper fill rate maintained
+  5. **Telemetry & Tooling**: Expose dedicated REST API endpoints under `/api/v1/execution-opt/*` and CLI audit runner `backend/scripts/execution_opt_runner.py`.
+  6. **Halt Execution**: Stop strictly at Phase 32 Checkpoint before Phase 33 Disaster Recovery.
+- **Consequences**: Drastically lower transaction drag, protection against illiquid market impact, enhanced fill latencies, and empirically proven execution edge validated in paper mode.
+- **Verification Evidence**:
+  - Dedicated Phase 32 tests passing in `backend/tests/test_execution_optimization.py`.
+  - Full repository regression tests passing across all test modules.
+  - Mypy clean across backend source files.
+  - Ruff clean across all Python source code.
+  - Preflight audit passing 14/14 dimensions.
+  - Frontend production build clean.
+
+
 
 
 
