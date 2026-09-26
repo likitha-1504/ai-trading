@@ -887,7 +887,74 @@ Status Key:
   - [x] Static linting passing with zero errors (`ruff check backend/`)
   - [x] Production frontend build passing (`tsc -b && vite build` in 1.87s)
   - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
-- [!] Phase 33 Gate Checkpoint: Disaster Recovery & Fault Resilience Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 33 complete. Execution halted before Phase 34 Security Hardening. Awaiting explicit user approval.)
+- [x] Phase 33 Gate Checkpoint: Disaster Recovery & Fault Resilience Sign-Off (Approved via explicit user instruction)
+
+## Phase 34: Security Hardening, Cryptographic Audit Ledger & Least Privilege Governance (Completed)
+- [x] Security Hardening Models & Enums (`backend/app/security/models.py`):
+  - [x] Security audit dimensions (`SECRETS_SANITIZATION`, `AUTHENTICATION`, `AUTHORIZATION_RBAC`, `DEPENDENCY_VULNERABILITY`, `NETWORK_EXPOSURE`, `AUDIT_LOG_TAMPER_EVIDENT`, `CONFIGURATION_INTEGRITY`, `BROKER_PERMISSIONS`)
+  - [x] Severity tiers (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `INFO`)
+  - [x] Role hierarchy enums (`VIEWER`, `OPERATOR`, `ADMIN`)
+  - [x] Token payload schemas and authentication models
+  - [x] Cryptographic audit log entry schemas
+  - [x] Config integrity evaluation schemas and violation tracking
+- [x] Secrets Sanitization & Masking (`backend/app/security/secrets_scanner.py`):
+  - [x] Automated regex scanning across source trees (`backend/app`, `backend/scripts`, `frontend/src`)
+  - [x] Pattern definitions for AWS, GitHub, OpenAI, Kite, private keys, API secrets
+  - [x] Strict `.gitignore` exclusion audit (`.env`, `*.db`, `backups/`, `*.log`, `.venv`)
+  - [x] Dynamic masking utility (`mask_secret`) with prefix/suffix preservation
+- [x] HMAC-SHA256 Token Authentication (`backend/app/security/auth.py`):
+  - [x] Structured operator bearer tokens (`OPTOK.<payload>.<hmac>`)
+  - [x] Constant-time signature verification (`hmac.compare_digest`)
+  - [x] Cryptographic nonce replay prevention, TTL expiration, and token revocation denylist
+- [x] Role-Based Access Control / RBAC (`backend/app/security/rbac.py`):
+  - [x] Three-tier hierarchy (`ADMIN > OPERATOR > VIEWER`)
+  - [x] Privilege comparison logic (`has_sufficient_role`)
+  - [x] FastAPI dependency security guard (`require_role`)
+  - [x] RBAC matrix audit finding generation
+- [x] Cryptographic Tamper-Evident Audit Logging (`backend/app/security/tamper_log.py`):
+  - [x] SQLite `security_audit_ledger` schema with indexed queries
+  - [x] Genesis block (`0`*64) and SHA-256 hash chaining ($H_i = \text{SHA256}(H_{i-1} : \text{event})$)
+  - [x] Full cryptographic chain verification (`verify_chain_integrity`) detecting mutations, deletions, or insertions
+- [x] Configuration Integrity & Inviolable Hard Caps (`backend/app/security/config_integrity.py`):
+  - [x] Enforces hard caps: `INITIAL_CAPITAL <= ₹100.00`, `AUTONOMOUS_CAPITAL_THRESHOLD <= ₹300.00`, `IS_PAPER_TRADING == True`
+  - [x] Canonical SHA-256 configuration checksum computation
+  - [x] `ConfigurationTamperError` exception raised on any boundary violation
+- [x] Dependency Pinning & Supply Chain Audit (`backend/app/security/dependency_auditor.py`):
+  - [x] `pyproject.toml` dependency parsing
+  - [x] Detection of unpinned wildcards (`*`, `>=`)
+- [x] Network Exposure & Defensive Headers (`backend/app/security/network_guard.py`):
+  - [x] OWASP security response headers (`X-Frame-Options`, `X-Content-Type-Options`, `CSP`, `HSTS`, `Referrer-Policy`)
+  - [x] `SecurityHeadersMiddleware` Starlette/FastAPI middleware integration in `backend/app/main.py`
+  - [x] Local interface binding and CORS verification
+- [x] Broker Scope & Least Privilege Audit (`backend/app/security/broker_scope.py`):
+  - [x] Zero exposure of prohibited banking / withdrawal endpoints
+  - [x] Enforces read quotes and order placement least privilege
+  - [x] Paper trading adapter isolation verification
+- [x] Master Security Hardening Auditor (`backend/app/security/security_auditor.py` & `__init__.py`):
+  - [x] Orchestrates all 8 security dimension checks
+  - [x] Issues comprehensive `SecurityHardeningReport`
+- [x] FastAPI REST Endpoints (`backend/app/api/v1/endpoints/security.py`):
+  - [x] `GET /api/v1/security/audit`
+  - [x] `POST /api/v1/security/verify-tamper-log`
+  - [x] `POST /api/v1/security/scan-secrets`
+  - [x] `POST /api/v1/security/issue-token`
+  - [x] `GET /api/v1/security/config-integrity`
+- [x] Router integration (`backend/app/api/v1/router.py`)
+- [x] Operational CLI runner & audit tool (`backend/scripts/security_audit_runner.py`):
+  - [x] Formatted ASCII 8-dimension audit dashboard
+  - [x] Structured JSON streaming (`--json`)
+  - [x] Hash chain verification probe (`--verify-tamper-log`)
+  - [x] Token issuance utility (`--issue-token`)
+- [x] Technical documentation (`docs/security/security_hardening.md`)
+- [x] Architecture Decision Record (`ADR-038` recorded in `DECISIONS.md`)
+- [x] Full quality gates & test regression:
+  - [x] 20/20 dedicated Phase 34 tests passing (`backend/tests/test_security_hardening.py`)
+  - [x] 411/411 full repository regression tests passing across 32 test modules
+  - [x] Static type checking passing with zero errors (`mypy backend/app` across 178 source files)
+  - [x] Static linting passing with zero errors (`ruff check backend/`)
+  - [x] Production frontend build passing (`tsc -b && vite build` in 1.88s)
+  - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
+- [!] Phase 34 Gate Checkpoint: Security Hardening & Cryptographic Ledger Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 34 complete. Execution halted before Phase 35 Research Sandbox. Awaiting explicit user approval.)
 
 
 

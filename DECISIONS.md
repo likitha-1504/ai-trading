@@ -1011,18 +1011,29 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit passing 14/14 dimensions.
   - Frontend production build clean.
 
+---
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+## ADR-038: Phase 34 Security Hardening, Cryptographic Audit Ledger, and Least Privilege Governance
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 34 Checkpoint Complete; Halted Before Phase 35)
+- **Context**: Autonomous and algorithmic trading agents with execution capabilities require deep multi-layer security hardening spanning secrets exclusion, authentication, role-based access control, dependency supply chain, network exposure, immutable audit logs, configuration integrity, and broker scopes.
+- **Decision**:
+  1. **Secrets Sanitization (`SecretsScanner`)**: Audit source trees and `.gitignore` against regex patterns for cloud, broker, and AI API keys; enforce dynamic redaction (`***REDACTED***`).
+  2. **Cryptographic HMAC-SHA256 Authentication (`AuthenticationManager`)**: Issue and verify bearer tokens using constant-time comparisons (`hmac.compare_digest`), cryptographic nonces, and revocation tracking.
+  3. **Role-Based Access Control (`AccessControlManager`)**: Enforce three-tier hierarchy (`ADMIN > OPERATOR > VIEWER`) across API endpoints via FastAPI dependency guards.
+  4. **Supply Chain & Dependency Pinning (`DependencyAuditor`)**: Audit `pyproject.toml` to prohibit unpinned wildcards for core packages.
+  5. **Network Exposure & OWASP Headers (`NetworkSecurityAuditor`, `SecurityHeadersMiddleware`)**: Enforce defensive HTTP headers (CSP, X-Frame-Options, X-Content-Type-Options) and local host binding.
+  6. **Tamper-Evident Audit Logging (`TamperEvidentAuditLogger`)**: Chain security and operational events with SHA-256 hashes linking each entry to its predecessor in SQLite, enabling mathematical proof against tampering.
+  7. **Configuration Integrity (`ConfigIntegrityValidator`)**: Compute deterministic config checksums and enforce immutable capital ceilings (₹100/₹300) and paper safety locks.
+  8. **Broker Permissions & Scopes (`BrokerScopeAuditor`)**: Verify zero exposure of banking or withdrawal APIs, ensuring pure order placement and quote reading privileges.
+  9. **Telemetry & Tooling**: Expose dedicated REST API endpoints under `/api/v1/security/*` and CLI audit runner `backend/scripts/security_audit_runner.py`.
+  10. **Halt Execution**: Stop strictly at Phase 34 Checkpoint before Phase 35 Research Sandbox.
+- **Consequences**: Protection against credential leaks, unauthorized mutations, log tampering, supply-chain hijacking, and unauthorized broker actions, ensuring bank-grade security governance.
+- **Verification Evidence**:
+  - Dedicated Phase 34 tests passing in `backend/tests/test_security_hardening.py`.
+  - Full repository regression tests passing across all test modules.
+  - Mypy clean across backend source files.
+  - Ruff clean across all Python source code.
+  - Preflight audit passing 14/14 dimensions.
+  - Frontend production build clean.
 
