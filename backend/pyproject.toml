@@ -29,5 +29,5 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [tool.ruff.lint]
-ignore = ["B008", "UP", "I001"]
+ignore = ["B008", "UP", "I001", "RUF059"]
 

@@ -1037,3 +1037,26 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit passing 14/14 dimensions.
   - Frontend production build clean.
 
+---
+
+## ADR-039: Phase 35 Research Sandbox, Reproducible Datasets, and Governed Promotion Protocol
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 35 Checkpoint Complete; Halted Before Phase 36)
+- **Context**: Unverified research algorithms and hyperparameter overfitting present existential risks to capital if permitted to touch production infrastructure, live broker connections, or persist directly to live databases. A hermetically isolated research sandbox with cryptographically fingerprinted datasets, versioned configurations, and strict non-silent promotion gates is necessary.
+- **Decision**:
+  1. **Production Quarantine & Isolation (`SandboxIsolationGuard`)**: Sandbox code is barred from accessing the production SQLite database, live broker instances, and live order queues; execution runs within `isolated_sandbox_scope()`.
+  2. **Reproducible Datasets (`ReproducibleDatasetRegistry`)**: Canonical market datasets are versioned and fingerprinted using SHA-256 hashing across serialized bars with fixed PRNG seeds, ensuring identical replay.
+  3. **Versioned Configuration (`VersionedConfigManager`)**: Experiment configs bind strategy code hashes, hyperparameters, risk constraints, and dataset hashes into a canonical `config_hash`.
+  4. **Simulation Engine & Frictions (`ResearchSandboxEngine`)**: Simulates strategies with realistic Indian market frictions (STT/GST taxes, 15 paise micro-slippage), producing deterministic execution hashes and metrics.
+  5. **Exact Mathematical Reproducibility (`verify_reproducibility`)**: Validates that re-running simulations on the same dataset produces identical execution hashes ($\Delta = 0.0$).
+  6. **Governed Promotion Gate (`ExplicitPromotionGate`)**: Requires passing strict quantitative hurdles (Sharpe $\ge 1.2$, Profit Factor $\ge 1.3$, Drawdown $\le 2.5\%$, Trades $\ge 20$), zero temporal leakage, and a signed operator token (`OPERATOR-PROMOTION-PHASE35-*`), with decisions logged to the cryptographic `security_audit_ledger`.
+  7. **Halt Execution**: Stop strictly at Phase 35 Checkpoint before Phase 36 AI Council Evolution.
+- **Consequences**: Guarantees that only statistically robust, reproducible, and explicitly authorized strategies can graduate from research to candidate stage, preventing overfitting and unvetted models from entering production.
+- **Verification Evidence**:
+  - Dedicated Phase 35 tests passing in `backend/tests/test_research_sandbox.py`.
+  - Full repository regression tests passing across all test modules.
+  - Mypy clean across backend source files.
+  - Ruff clean across all Python source code.
+  - Preflight audit passing 14/14 dimensions.
+  - Frontend production build clean.
+

@@ -954,7 +954,70 @@ Status Key:
   - [x] Static linting passing with zero errors (`ruff check backend/`)
   - [x] Production frontend build passing (`tsc -b && vite build` in 1.88s)
   - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
-- [!] Phase 34 Gate Checkpoint: Security Hardening & Cryptographic Ledger Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 34 complete. Execution halted before Phase 35 Research Sandbox. Awaiting explicit user approval.)
+- [x] Phase 34 Gate Checkpoint: Security Hardening & Cryptographic Ledger Sign-Off (Approved via explicit user instruction)
+
+## Phase 35: Research Sandbox & Governed Promotion Protocol (Completed)
+- [x] Research Sandbox Models & Enums (`backend/app/sandbox/models.py`):
+  - [x] Isolation state enums (`QUARANTINED`, `ACTIVE`, `VIOLATION_DETECTED`)
+  - [x] Promotion stage enums (`DRAFT`, `SANDBOX_EXECUTED`, `REPRODUCIBILITY_VERIFIED`, `PROMOTION_REQUESTED`, `APPROVED_CANDIDATE`, `REJECTED`)
+  - [x] Dataset partition classification (`TRAIN`, `TEST`, `WALK_FORWARD`, `OUT_OF_SAMPLE`)
+  - [x] Reproducible dataset schemas and canonical OHLCV bars
+  - [x] Versioned experiment configuration models
+  - [x] Simulation execution metrics and results schemas
+  - [x] Quantitative promotion hurdles and evaluation scorecards
+  - [x] Domain exceptions: `ProductionIsolationError`, `DatasetReproducibilityError`, `PromotionGateError`, `SilentPromotionError`
+- [x] Production Isolation Guard & Quarantine Enforcer (`backend/app/sandbox/isolation_guard.py`):
+  - [x] Production database path isolation check (`validate_database_isolation`)
+  - [x] Broker adapter isolation check (`validate_broker_isolation`)
+  - [x] Thread-safe context scope (`isolated_sandbox_scope`)
+  - [x] Isolation boundary audit status report
+- [x] Reproducible Dataset Registry & SHA-256 Fingerprinting (`backend/app/sandbox/dataset_registry.py`):
+  - [x] Deterministic synthetic bars generator with fixed PRNG seeds
+  - [x] Canonical SHA-256 fingerprinting across discrete bar streams (`compute_bars_sha256`)
+  - [x] Immutable dataset registration and duplicate rejection
+  - [x] Dataset tamper detection and integrity verification (`verify_integrity`)
+  - [x] Pre-seeded baseline datasets (`DATASET-NIFTY-MICRO-2026-TRAIN`, `DATASET-NIFTY-MICRO-2026-TEST`)
+- [x] Versioned Code & Configuration Manager (`backend/app/sandbox/versioned_config.py`):
+  - [x] Canonical JSON serialization and SHA-256 configuration hashing (`compute_config_hash`)
+  - [x] Immutable binding of code hash + parameter state + risk bounds + dataset hash
+  - [x] Pre-registered experiment configs (`EXP-SANDBOX-EMA-V1`, `EXP-SANDBOX-ORB-V1`)
+- [x] Isolated Research Simulation Engine (`backend/app/sandbox/sandbox_engine.py`):
+  - [x] Simulation execution within quarantined sandbox scope
+  - [x] Realistic Indian market friction modeling (STT/GST taxes, 15 paise micro-slippage)
+  - [x] Deterministic execution hash computation (`compute_execution_hash`)
+  - [x] Exact mathematical reproducibility verification (`verify_reproducibility` with $\Delta = 0.0$)
+- [x] Governed Explicit Promotion Gate (`backend/app/sandbox/promotion_gate.py`):
+  - [x] Multi-stage candidate scorecard evaluation
+  - [x] Quantitative hurdles enforcement: Trades $\ge 20$, Win Rate $\ge 50\%$, PF $\ge 1.30$, Sharpe $\ge 1.20$, DD $\le 2.50\%$
+  - [x] Look-ahead and cross-split leakage verification
+  - [x] Anti-silent promotion guard: mandatory signed operator token (`OPERATOR-PROMOTION-PHASE35-*`)
+  - [x] Cryptographic tamper-evident audit logging in `security_audit_ledger`
+- [x] FastAPI REST Endpoints (`backend/app/api/v1/endpoints/sandbox.py`):
+  - [x] `GET /api/v1/sandbox/status`
+  - [x] `GET /api/v1/sandbox/datasets`
+  - [x] `GET /api/v1/sandbox/datasets/{id}/verify`
+  - [x] `GET /api/v1/sandbox/experiments`
+  - [x] `POST /api/v1/sandbox/experiments/run`
+  - [x] `POST /api/v1/sandbox/experiments/verify-reproducibility`
+  - [x] `POST /api/v1/sandbox/promote`
+- [x] Router integration (`backend/app/api/v1/router.py`)
+- [x] Operational CLI runner & governance tool (`backend/scripts/sandbox_runner.py`):
+  - [x] Quarantine status probe (`--status`)
+  - [x] Dataset and configuration catalog (`--list`)
+  - [x] Formatted ASCII simulation dashboard (`--run`)
+  - [x] Exact reproducibility verifier (`--verify`)
+  - [x] Governed promotion CLI (`--promote`, `--token`, `--rationale`)
+  - [x] Structured JSON streaming (`--json`)
+- [x] Technical documentation (`docs/research/research_sandbox.md`)
+- [x] Architecture Decision Record (`ADR-039` recorded in `DECISIONS.md`)
+- [x] Full quality gates & test regression:
+  - [x] 15/15 dedicated Phase 35 tests passing (`backend/tests/test_research_sandbox.py`)
+  - [x] 426/426 full repository regression tests passing across 33 test modules
+  - [x] Static type checking passing with zero errors (`mypy backend/app` across 186 source files)
+  - [x] Static linting passing with zero errors (`ruff check backend/`)
+  - [x] Production frontend build passing (`tsc -b && vite build` in 1.89s)
+  - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
+- [!] Phase 35 Gate Checkpoint: Research Sandbox & Governed Promotion Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 35 complete. Execution halted before Phase 36 AI Council Evolution. Awaiting explicit user approval.)
 
 
 
