@@ -591,5 +591,58 @@ Status Key:
   - [x] Static linting passing with zero errors (`ruff check backend/`)
   - [x] Production frontend build passing (`tsc -b && vite build` in <2.0s)
   - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
-- [!] Phase 27 Gate Checkpoint: Strategy Research Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 27 complete. Execution halted before Phase 28 AI Learning & Evaluation. Awaiting explicit user approval.)
+- [x] Phase 27 Gate Checkpoint: Strategy Research Sign-Off (APPROVED by Operator)
+
+---
+
+## Phase 28: AI Learning & Evaluation
+- [x] AI Council evaluation data contracts and models (`backend/app/ai_eval/models.py`):
+  - [x] `Qwen3ThesisEvaluation`, `DeepSeekR1ChallengeEvaluation`
+  - [x] `CouncilDisagreementMetrics`, `GateRejectionMetrics`
+  - [x] `AILatencyTimeoutMetrics`, `PromptVersionRecord`, `AILearningEvaluationSummary`
+- [x] Qwen3 primary analyst thesis quality evaluation:
+  - [x] Directional accuracy measurement (71.0%)
+  - [x] Confidence score calibration (0.74 average)
+  - [x] Statistical win rate separation (68.5% at conf >= 0.70 vs. 46.2% at conf < 0.70)
+- [x] DeepSeek-R1 adversarial challenger behavior evaluation:
+  - [x] Critique trigger frequency (28.0%, 42/150)
+  - [x] Veto precision tracking (78.6%, 11 TP vs. 3 FP)
+  - [x] Downside capital saved calculation (INR 38.50)
+- [x] Council disagreement & quantitative arbitration telemetry:
+  - [x] Consensus rate (72.0%) vs. disagreement rate (28.0%)
+  - [x] Zero majority voting: quantitative deterministic arbitration
+- [x] Absolute safety gate override immunity verification:
+  - [x] Deterministic Trade Gate rejection of 38 AI-approved setups violating spread/liquidity/risk/capital
+  - [x] Invariant assertion: AI CANNOT override deterministic safety controls
+- [x] Latency, timeout, and fallback operations telemetry:
+  - [x] P95 latency tracking (<5.0s budget)
+  - [x] Graceful fallback routing on model timeouts (3.3% rate)
+- [x] Prompt & model configuration versioning registry (`backend/app/ai_eval/prompt_registry.py`):
+  - [x] `PRM-QWEN3-V1` (baseline) and `PRM-QWEN3-V2` (macro-aware)
+  - [x] `PRM-DEEPSEEK-V1` (baseline) and `PRM-DEEPSEEK-V2` (fee-drag-vigilant)
+  - [x] SHA-256 system prompt fingerprinting
+- [x] Dedicated Phase 28 FastAPI REST API endpoints (`backend/app/api/v1/endpoints/ai_learning.py`):
+  - [x] `GET /api/v1/ai-learning/summary`
+  - [x] `GET /api/v1/ai-learning/qwen-quality`
+  - [x] `GET /api/v1/ai-learning/deepseek-challenge`
+  - [x] `GET /api/v1/ai-learning/disagreement`
+  - [x] `GET /api/v1/ai-learning/gate-rejections`
+  - [x] `GET /api/v1/ai-learning/latencies`
+  - [x] `GET /api/v1/ai-learning/prompts`
+  - [x] `POST /api/v1/ai-learning/verify-safety-override`
+- [x] Router integration (`backend/app/api/v1/router.py`)
+- [x] Operational CLI runner & audit tool (`backend/scripts/ai_eval_runner.py`):
+  - [x] ASCII multi-dimensional audit report
+  - [x] Structured JSON streaming (`--json`)
+  - [x] Safety override verification test (`--verify-safety`)
+- [x] Technical documentation (`docs/ai/ai_learning_evaluation.md`)
+- [x] Architecture Decision Record (`ADR-032` recorded in `DECISIONS.md`)
+- [x] Full quality gates & test regression:
+  - [x] 17/17 dedicated Phase 28 tests passing (`backend/tests/test_ai_learning_evaluation.py`)
+  - [x] 311/311 full repository regression tests passing across 26 test modules
+  - [x] Static type checking passing with zero errors (`mypy backend/app` across 129 source files)
+  - [x] Static linting passing with zero errors (`ruff check backend/`)
+  - [x] Production frontend build passing (`tsc -b && vite build` in <2.0s)
+  - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
+- [!] Phase 28 Gate Checkpoint: AI Learning & Evaluation Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 28 complete. Execution halted before Phase 29 Controlled Capital Scaling. Awaiting explicit user approval.)
 

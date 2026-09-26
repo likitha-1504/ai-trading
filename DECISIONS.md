@@ -865,6 +865,30 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight operational audit passing 14/14 dimensions.
   - Frontend production build compiling cleanly in <2.0s.
 
+---
+
+## ADR-032: Phase 28 AI Learning, Dual-Model Council Evaluation, and Prompt Versioning Architecture
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 28 Checkpoint Complete; Halted Before Phase 29)
+- **Context**: Transitioning from Phase 27 (Strategy Research) to Phase 28 (AI Learning & Evaluation) requires quantitative calibration of the dual-model AI Council (Qwen3 Analyst & DeepSeek-R1 Challenger), measuring directional thesis accuracy, adversarial challenge and veto precision, disagreement telemetry, model latency, and prompt configuration versioning, while guaranteeing that **AI models can never override deterministic safety controls**.
+- **Decision**:
+  1. **Qwen3 Quality Calibration**: Measure thesis directional accuracy (71.0%) and confirm edge separation between high confidence ($\ge 0.70$, 68.5% win rate) and low confidence ($< 0.70$, 46.2% win rate).
+  2. **DeepSeek-R1 Veto Precision**: Track challenge frequency (28.0%), veto precision (78.6%), and net downside capital saved (INR 38.50).
+  3. **Deterministic Arbitration**: Standardize on quantitative arbitration (zero majority voting). Deterministic facts (spread, liquidity, stop-risk) arbitrate council disagreements.
+  4. **Absolute Safety Gate Inviolability**: The deterministic Trade Gate unconditionally rejects AI-approved setups violating spread ($>15$ bps), liquidity ($<70$), risk ($>1.5\%$), or capital ceiling (INR 100). AI signals hold zero override authority.
+  5. **Prompt & Configuration Versioning**: Implement `PromptConfigRegistry` with SHA-256 fingerprinting to prevent unversioned prompt drift.
+  6. **Telemetry & Tooling**: Expose dedicated REST API endpoints under `/api/v1/ai-learning/*` and CLI audit runner `backend/scripts/ai_eval_runner.py`.
+  7. **Halt Execution**: Stop strictly at Phase 28 Checkpoint before Phase 29 Controlled Capital Scaling.
+- **Consequences**: Empirical proof of AI predictive value, verified downside capital defense by the adversarial challenger, and guaranteed safety gate immunity against AI override attempts.
+- **Verification Evidence**:
+  - 17/17 dedicated Phase 28 tests passing.
+  - 311/311 full repository regression tests passing across 26 test modules.
+  - Mypy clean across 129 source files.
+  - Ruff clean across all Python source code.
+  - Preflight audit passing 14/14 dimensions.
+  - Frontend production build compiling cleanly in <2.0s.
+
+
 
 
 
