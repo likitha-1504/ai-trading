@@ -682,5 +682,61 @@ Status Key:
   - [x] Static linting passing with zero errors (`ruff check backend/`)
   - [x] Production frontend build passing (`tsc -b && vite build` in 1.87s)
   - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
-- [!] Phase 29 Gate Checkpoint: Controlled Capital Scaling Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 29 complete. Execution halted before Phase 30 Advanced Market Intelligence. Awaiting explicit user approval.)
+- [x] Phase 29 Gate Checkpoint: Controlled Capital Scaling Sign-Off (Approved via explicit user instruction)
+
+## Phase 30: Advanced Market Intelligence (Current Phase)
+- [x] Market Intelligence Data Models & Schemas (`backend/app/market_intelligence/models.py`):
+  - [x] Trend regimes: `BULL_MOMENTUM`, `BEAR_MOMENTUM`, `MEAN_REVERTING_RANGE`, `VOLATILE_BREAKOUT`, `NEUTRAL_CHOP`
+  - [x] Volatility states: `VOLATILITY_COMPRESSION`, `NORMAL_VOLATILITY`, `HIGH_VOLATILITY`, `EXTREME_VOLATILITY_CIRCUIT`
+  - [x] Breadth regimes: `STRONG_EXPANSION`, `HEALTHY_BULL`, `NEUTRAL_CHURN`, `WEAK_BEAR`, `STRONG_LIQUIDATION`
+  - [x] Prescribed intelligence actions: `FAVOR_TREND_FOLLOWING`, `FAVOR_MEAN_REVERSION`, `FAVOR_VOLATILITY_BREAKOUT`, `DEFENSIVE_REDUCE_SIZE`, `HALT_NEW_POSITIONS`
+  - [x] Point-in-time composite snapshot and regime backtest result schemas
+- [x] Directional Regime Detector (`backend/app/market_intelligence/regime_detector.py`):
+  - [x] Wilder-smoothed ADX (14-period), +DI, and -DI calculations
+  - [x] Moving average stack evaluation (9 EMA, 21 EMA, 50 SMA)
+  - [x] Breakout detection and normalized trend strength scoring (0-100)
+- [x] Volatility Regime & Squeeze Analyzer (`backend/app/market_intelligence/volatility_regime.py`):
+  - [x] Rolling ATR calculation and historical percentile ranking
+  - [x] Bollinger Bands and Keltner Channels squeeze condition detection
+  - [x] Defensive capital risk scaling multipliers (0.0x to 1.0x)
+- [x] Sector Context & Relative Strength Analyzer (`backend/app/market_intelligence/sector_context.py`):
+  - [x] NSE equity sector mapping across 8 benchmark sectors
+  - [x] Mansfield Relative Strength computation vs sector benchmarks
+  - [x] Sector leadership ranking and directional tailwind verification
+- [x] Cross-Sectional Market Breadth Analyzer (`backend/app/market_intelligence/market_breadth.py`):
+  - [x] Advance/Decline ratio and participation (% > 20 EMA, % > 50 SMA)
+  - [x] Breadth thrust identification and breadth regime classification
+- [x] Unified Advanced Market Intelligence Engine (`backend/app/market_intelligence/intelligence_engine.py`):
+  - [x] Point-in-time evaluation synthesizing all 4 dimensions
+  - [x] Zero-lookahead verification via `LeakageAuditor` (monotonic ordering and event timestamps prior to evaluation time)
+  - [x] Dynamic position sizing multiplier and circuit halt guards
+- [x] Regime-Conditioned Backtesting Evaluator (`backend/app/market_intelligence/backtest_evaluator.py`):
+  - [x] Backtest harness measuring baseline vs intelligence-filtered performance
+  - [x] Quantified Sharpe enhancement and max drawdown reduction
+  - [x] Event stream leakage verification
+- [x] Package exports (`backend/app/market_intelligence/__init__.py`)
+- [x] FastAPI REST Endpoints (`backend/app/api/v1/endpoints/market_intelligence.py`):
+  - [x] `GET /api/v1/market-intelligence/snapshot`
+  - [x] `GET /api/v1/market-intelligence/regimes`
+  - [x] `GET /api/v1/market-intelligence/volatility`
+  - [x] `GET /api/v1/market-intelligence/sector-context`
+  - [x] `GET /api/v1/market-intelligence/breadth`
+  - [x] `POST /api/v1/market-intelligence/backtest`
+  - [x] `POST /api/v1/market-intelligence/audit-leakage`
+- [x] Router integration (`backend/app/api/v1/router.py`)
+- [x] Operational CLI runner & audit tool (`backend/scripts/market_intelligence_runner.py`):
+  - [x] Formatted ASCII multi-dimensional audit dashboard
+  - [x] Structured JSON streaming (`--json`)
+  - [x] Standalone backtesting validation (`--backtest`)
+  - [x] Standalone leakage audit (`--audit-leakage`)
+- [x] Technical documentation (`docs/research/advanced_market_intelligence.md`)
+- [x] Architecture Decision Record (`ADR-034` recorded in `DECISIONS.md`)
+- [x] Full quality gates & test regression:
+  - [x] 17/17 dedicated Phase 30 tests passing (`backend/tests/test_market_intelligence.py`)
+  - [x] 340/340 full repository regression tests passing across 28 test modules
+  - [x] Static type checking passing with zero errors (`mypy backend/app` across 142 source files)
+  - [x] Static linting passing with zero errors (`ruff check backend/`)
+  - [x] Production frontend build passing (`tsc -b && vite build` in 2.39s)
+  - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
+- [!] Phase 30 Gate Checkpoint: Advanced Market Intelligence Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 30 complete. Execution halted before Phase 31 Multi-Strategy Portfolio. Awaiting explicit user approval.)
 

@@ -910,6 +910,31 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit passing 14/14 dimensions.
   - Frontend production build compiling cleanly in <2.0s.
 
+---
+
+## ADR-034: Phase 30 Advanced Market Intelligence, Regime Detection, Sector Context, and Leakage-Audited Backtesting
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 30 Checkpoint Complete; Halted Before Phase 31)
+- **Context**: Phase 30 mandates the research and implementation of Advanced Market Intelligence: regime detection, sector context, volatility regime, market breadth, and point-in-time validated features with strict leakage/look-ahead auditing and quantitative backtesting.
+- **Decision**:
+  1. **Directional Trend Regime Detection (`RegimeDetector`)**: Multi-factor classification into `BULL_MOMENTUM`, `BEAR_MOMENTUM`, `MEAN_REVERTING_RANGE`, `VOLATILE_BREAKOUT`, and `NEUTRAL_CHOP` using Wilder-smoothed ADX (14-period), +DI/-DI, and moving average alignment (9 EMA, 21 EMA, 50 SMA).
+  2. **Volatility Regime & Squeeze Analyzer (`VolatilityAnalyzer`)**: Classify into `VOLATILITY_COMPRESSION`, `NORMAL_VOLATILITY`, `HIGH_VOLATILITY`, and `EXTREME_VOLATILITY_CIRCUIT` using rolling ATR historical percentiles, Bollinger Bandwidth, and Keltner Channel squeeze detection; assign defensive risk multipliers (0.0x to 1.0x).
+  3. **Sector Context & Mansfield Relative Strength (`SectorAnalyzer`)**: Map instruments to 8 core NSE sectors (`NIFTY_IT`, `NIFTY_BANK`, `NIFTY_AUTO`, etc.), evaluate Mansfield Relative Strength against sector benchmarks, rank sector leaders, and evaluate directional sector tailwinds.
+  4. **Cross-Sectional Market Breadth (`BreadthAnalyzer`)**: Evaluate universe participation (Advance/Decline ratio, % > 20 EMA, % > 50 SMA), categorize into breadth regimes, and flag acute breadth thrusts.
+  5. **Unified Point-in-Time Engine & Leakage Auditing (`AdvancedMarketIntelligenceEngine`)**: Synthesize composite market intelligence with strict zero-lookahead verification via `LeakageAuditor`. All inputs audited for monotonic ordering and event timestamps prior to evaluation time.
+  6. **Regime-Conditioned Backtesting (`RegimeBacktestEvaluator`)**: Quantify performance enhancements from regime filtering (improving Sharpe ratio and reducing max drawdowns by excluding extreme volatility and requiring sector tailwinds).
+  7. **Telemetry & Tooling**: Expose dedicated REST API endpoints under `/api/v1/market-intelligence/*` and CLI audit runner `backend/scripts/market_intelligence_runner.py`.
+  8. **Halt Execution**: Stop strictly at Phase 30 Checkpoint before Phase 31 Multi-Strategy Portfolio.
+- **Consequences**: Statistically validated macro/sector awareness, robust protection against choppy and extreme volatility regimes, elimination of lookahead bias in feature research, and proven risk-adjusted return enhancement.
+- **Verification Evidence**:
+  - Dedicated Phase 30 tests passing in `backend/tests/test_market_intelligence.py`.
+  - Full repository regression tests passing across all test modules.
+  - Mypy clean across backend source files.
+  - Ruff clean across all Python source code.
+  - Preflight audit passing 14/14 dimensions.
+  - Frontend production build clean.
+
+
 
 
 

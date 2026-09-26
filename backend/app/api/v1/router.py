@@ -25,6 +25,7 @@ from app.api.v1.endpoints import (
     research,
     ai_learning,
     capital_scaling,
+    market_intelligence,
 )
 
 api_router = APIRouter()
@@ -36,6 +37,7 @@ api_router.include_router(stabilization.router, prefix="/stabilization", tags=["
 api_router.include_router(research.router, prefix="/research", tags=["research"])
 api_router.include_router(ai_learning.router, prefix="/ai-learning", tags=["ai-learning"])
 api_router.include_router(capital_scaling.router, prefix="/capital-scaling", tags=["capital-scaling"])
+api_router.include_router(market_intelligence.router, tags=["market-intelligence"])
 api_router.include_router(live_experiment.router, prefix="/live/experiment", tags=["live-experiment"])
 api_router.include_router(autonomous.router, prefix="/autonomous", tags=["autonomous"])
 
