@@ -28,6 +28,7 @@ from app.api.v1.endpoints import (
     market_intelligence,
     portfolio,
     execution_opt,
+    disaster_recovery,
 )
 
 api_router = APIRouter()
@@ -42,6 +43,7 @@ api_router.include_router(capital_scaling.router, prefix="/capital-scaling", tag
 api_router.include_router(market_intelligence.router, tags=["market-intelligence"])
 api_router.include_router(portfolio.router, tags=["portfolio"])
 api_router.include_router(execution_opt.router, tags=["execution-opt"])
+api_router.include_router(disaster_recovery.router, tags=["disaster-recovery"])
 api_router.include_router(live_experiment.router, prefix="/live/experiment", tags=["live-experiment"])
 api_router.include_router(autonomous.router, prefix="/autonomous", tags=["autonomous"])
 

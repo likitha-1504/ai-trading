@@ -828,6 +828,66 @@ Status Key:
   - [x] Static linting passing with zero errors (`ruff check backend/`)
   - [x] Production frontend build passing (`tsc -b && vite build` in 3.66s)
   - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
-- [!] Phase 32 Gate Checkpoint: Execution Optimization & Paper Validation Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 32 complete. Execution halted before Phase 33 Disaster Recovery. Awaiting explicit user approval.)
+- [x] Phase 32 Gate Checkpoint: Execution Optimization & Paper Validation Sign-Off (Approved via explicit user instruction)
+
+## Phase 33: Disaster Recovery, Fault Resilience & Business Continuity (Completed)
+- [x] Disaster Recovery Models & Enums (`backend/app/disaster_recovery/models.py`):
+  - [x] Disaster scenario types (`PROCESS_CRASH`, `BROKER_DISCONNECT`, `STALE_MARKET_DATA`, `DATABASE_FAILURE`, `DUPLICATE_ORDER_ATTACK`, `STATE_DIVERGENCE`)
+  - [x] System continuity status lifecycle (`HEALTHY`, `DEGRADED`, `RECOVERING`, `SAFE_HALTED`, `RESUMED`)
+  - [x] Stale data thresholds and quote freshness telemetry schemas
+  - [x] Persistent idempotency record schemas
+  - [x] Broker disconnect telemetry and retry backoff schemas
+  - [x] SQLite WAL database health schemas
+  - [x] Cross-ledger state reconstruction schemas
+  - [x] Formal safe resumption attestation schemas
+- [x] Stale Market Data Guard (`backend/app/disaster_recovery/stale_data_guard.py`):
+  - [x] Strict quote age monitoring (< 5.0s threshold)
+  - [x] Market feed heartbeat gap detector (< 10.0s threshold)
+  - [x] Deterministic trade blocking and `StaleMarketDataError` enforcement
+- [x] Persistent Idempotency & Duplicate Prevention (`backend/app/disaster_recovery/idempotency_manager.py`):
+  - [x] Cryptographic SHA-256 deterministic order fingerprinting
+  - [x] Persistent SQLite `order_idempotency_ledger` with indexed queries
+  - [x] Dual-layer memory and disk deduplication surviving process crashes
+- [x] Broker Connection Resilience & Auto-Reconnect (`backend/app/disaster_recovery/broker_resilience.py`):
+  - [x] Probing and disconnect detection
+  - [x] Exponential retry backoff with jitter
+  - [x] Post-reconnect active order book resynchronization
+  - [x] Post-reconnect position audit
+- [x] Database Resilience, WAL Recovery & Corruption Failover (`backend/app/disaster_recovery/db_resilience.py`):
+  - [x] `PRAGMA integrity_check`, `PRAGMA journal_mode=WAL`, foreign key enforcement
+  - [x] Atomic WAL truncation checkpoints (`PRAGMA wal_checkpoint(TRUNCATE)`)
+  - [x] Automated failover and restoration from latest verified backup snapshot
+- [x] Cross-Ledger State Reconstruction & Reconciliation (`backend/app/disaster_recovery/state_reconstructor.py`):
+  - [x] Reconciles local SQLite state against broker gateway state
+  - [x] Detects orphan positions (in broker, missing in DB) and phantom positions (in DB, missing in broker)
+  - [x] Identifies quantity mismatches and cash/equity divergences (> INR 0.05)
+- [x] Governed Safe Resumption Controller (`backend/app/disaster_recovery/safe_resume.py`):
+  - [x] Enforces 5-point pre-resumption checklist (operator token, DB integrity, broker connection, state reconciliation, fresh feeds)
+  - [x] Validates `OPERATOR-RESUME-*` token format
+  - [x] Issues formal `SafeResumeAttestation` and manages safe mode safeguards
+- [x] Unified Disaster Recovery Orchestrator (`backend/app/disaster_recovery/recovery_orchestrator.py` & `__init__.py`):
+  - [x] Executes full 6-scenario automated fault injection drill
+- [x] FastAPI REST Endpoints (`backend/app/api/v1/endpoints/disaster_recovery.py`):
+  - [x] `GET /api/v1/disaster-recovery/status`
+  - [x] `POST /api/v1/disaster-recovery/check-stale-data`
+  - [x] `POST /api/v1/disaster-recovery/reconstruct-state`
+  - [x] `POST /api/v1/disaster-recovery/safe-resume`
+  - [x] `POST /api/v1/disaster-recovery/run-drill`
+- [x] Router integration (`backend/app/api/v1/router.py`)
+- [x] Operational CLI runner & audit tool (`backend/scripts/disaster_recovery_runner.py`):
+  - [x] Formatted ASCII multi-scenario audit dashboard
+  - [x] Structured JSON streaming (`--json`)
+  - [x] Standalone status probe (`--status`)
+- [x] Technical documentation (`docs/operations/disaster_recovery.md`)
+- [x] Architecture Decision Record (`ADR-037` recorded in `DECISIONS.md`)
+- [x] Full quality gates & test regression:
+  - [x] 19/19 dedicated Phase 33 tests passing (`backend/tests/test_disaster_recovery.py`)
+  - [x] 391/391 full repository regression tests passing across 31 test modules
+  - [x] Static type checking passing with zero errors (`mypy backend/app` across 166 source files)
+  - [x] Static linting passing with zero errors (`ruff check backend/`)
+  - [x] Production frontend build passing (`tsc -b && vite build` in 1.87s)
+  - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
+- [!] Phase 33 Gate Checkpoint: Disaster Recovery & Fault Resilience Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 33 complete. Execution halted before Phase 34 Security Hardening. Awaiting explicit user approval.)
+
 
 

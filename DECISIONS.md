@@ -986,6 +986,32 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit passing 14/14 dimensions.
   - Frontend production build clean.
 
+---
+
+## ADR-037: Phase 33 Disaster Recovery, Fault Resilience, and Safe Resumption Protocol
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 33 Checkpoint Complete; Halted Before Phase 34)
+- **Context**: Autonomous and micro-capital algorithmic trading systems require battle-tested resilience against runtime disasters, including ungraceful process crashes, broker network partitions, stale data feeds, database corruption, duplicate order dispatches, and unmanaged state divergence.
+- **Decision**:
+  1. **Process Crash & In-Memory State Rehydration**: Rely on SQLite WAL storage to reconstitute cash balances, open positions in `IndependentPositionWatcher`, and active orders in `ExecutionEngine` post-crash.
+  2. **Broker Disconnect & Resilient Auto-Reconnect (`BrokerResilienceManager`)**: Handle session drops with exponential backoff and jitter, automatically resynchronizing order books and auditing positions against the broker upon reconnection.
+  3. **Stale Market Data Guard (`StaleDataGuard`)**: Monitor quote ages (< 5.0s threshold) and feed heartbeats (< 10.0s gap); immediately raise `StaleMarketDataError` and block trade admissions during feed anomalies.
+  4. **Database Resilience & Corruption Failover (`DatabaseResilienceManager`)**: Verify `PRAGMA integrity_check`, execute atomic WAL truncation checkpoints (`PRAGMA wal_checkpoint(TRUNCATE)`), and automate failover to SHA-256 verified backup snapshots.
+  5. **Persistent Idempotency Across Restarts (`IdempotencyManager`)**: Compute deterministic SHA-256 order fingerprints and persist them to SQLite `order_idempotency_ledger`, preventing duplicate submissions even across process restarts.
+  6. **Cross-Ledger State Reconstruction (`StateReconstructor`)**: Perform multi-source reconciliation between local database records and broker state, identifying orphan positions, phantom positions, and cash divergences.
+  7. **Governed Safe Resumption Protocol (`SafeResumeController`)**: Enforce a mandatory 5-point pre-resumption checklist (operator token, DB integrity, broker connectivity, state reconciliation, fresh data) before permitting active trading resumption.
+  8. **Telemetry & Tooling**: Expose REST endpoints under `/api/v1/disaster-recovery/*` and operational CLI tool `backend/scripts/disaster_recovery_runner.py`.
+  9. **Halt Execution**: Stop strictly at Phase 33 Checkpoint before Phase 34 Security Hardening.
+- **Consequences**: Deterministic fault tolerance, zero duplicate orders across crashes, guaranteed prevention of stale-data trading, automated corruption recovery, and governed safe resumption protecting live and paper capital.
+- **Verification Evidence**:
+  - Dedicated Phase 33 tests passing in `backend/tests/test_disaster_recovery.py`.
+  - Full repository regression tests passing across all test modules.
+  - Mypy clean across backend source files.
+  - Ruff clean across all Python source code.
+  - Preflight audit passing 14/14 dimensions.
+  - Frontend production build clean.
+
+
 
 
 
