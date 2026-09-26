@@ -22,6 +22,7 @@ from app.api.v1.endpoints import (
     learning,
     operations,
     stabilization,
+    research,
 )
 
 api_router = APIRouter()
@@ -30,6 +31,7 @@ api_router = APIRouter()
 api_router.include_router(system.router, prefix="/system", tags=["system"])
 api_router.include_router(operations.router, prefix="/operations", tags=["operations"])
 api_router.include_router(stabilization.router, prefix="/stabilization", tags=["stabilization"])
+api_router.include_router(research.router, prefix="/research", tags=["research"])
 api_router.include_router(live_experiment.router, prefix="/live/experiment", tags=["live-experiment"])
 api_router.include_router(autonomous.router, prefix="/autonomous", tags=["autonomous"])
 

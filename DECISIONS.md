@@ -842,6 +842,30 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit passing 14/14 dimensions.
   - Frontend production build compiling cleanly in 1.95s.
 
+---
+
+## ADR-031: Strategy Research, Experiment Versioning, and Leakage Guarding Architecture
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 27 Checkpoint Complete; Halted Before Phase 28)
+- **Context**: Transitioning from Phase 26 (Live Trading Stabilization) to Phase 27 (Strategy Research & Optimization) requires quantitative research workflows while guarding against look-ahead bias, split contamination, and unapproved/silent production entry.
+- **Decision**:
+  1. **Strict Branch Isolation**: Conduct research on an isolated branch (`research/phase27-strategy-optimization`).
+  2. **Immutable Experiment Registry**: Implement `StrategyExperimentRegistry` in `backend/app/research/experiment_registry.py` preserving `v1.0.0-baseline` immutably alongside research candidates `v1.1.0-volatility-filter` and `v1.2.0-dynamic-atr-exit`.
+  3. **Leakage & Look-Ahead Auditor**: Implement `LeakageAuditor` in `backend/app/research/leakage_auditor.py` to enforce monotonic timestamp ordering ($T_i \ge T_{i-1}$), split boundary separation ($\max(T_{train}) < \min(T_{test})$), and causal signal timestamping.
+  4. **Prohibition of Silent Production Entry**: Enforce explicit cryptographic/operator tokens (`OPERATOR-PHASE27-*`) via `promote_experiment()`. Unapproved calls raise `SilentProductionEntryError` (HTTP 403).
+  5. **Realistic Indian Friction & Walk-Forward Validation**: Integrate `IndianMarketCostModel` and 2.0 bps slippage with 3+ fold walk-forward out-of-sample stability validation.
+  6. **REST API & CLI**: Provide endpoints under `/api/v1/research/*` and terminal audit runner `backend/scripts/research_runner.py`.
+  7. **Halt Execution**: Stop strictly at Phase 27 Checkpoint before Phase 28 AI Learning & Evaluation.
+- **Consequences**: Rigorous quantitative methodology, zero forward-looking bias, immutable version lineage, and ironclad prevention of untested models entering production silently.
+- **Verification Evidence**:
+  - 16/16 dedicated Phase 27 tests passing.
+  - 294/294 full repository regression tests passing across 25 test modules.
+  - Mypy clean across 124 source files.
+  - Ruff clean across all Python source code.
+  - Preflight operational audit passing 14/14 dimensions.
+  - Frontend production build compiling cleanly in <2.0s.
+
+
 
 
 

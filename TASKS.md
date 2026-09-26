@@ -547,6 +547,49 @@ Status Key:
   - [x] Static type checking passing with zero errors (`mypy backend/app` across 118 source files)
   - [x] Static linting passing with zero errors (`ruff check backend/`)
   - [x] Production frontend build passing (`tsc -b && vite build` in 1.95s)
+- [x] Phase 26 Gate Checkpoint: Live Trading Stabilization Sign-Off (APPROVED by Operator)
+
+---
+
+## Phase 27: Strategy Research & Optimization
+- [x] Isolated research branch created (`research/phase27-strategy-optimization`)
+- [x] Research data models and contracts (`backend/app/research/models.py`):
+  - [x] `ExperimentVersion`, `ExperimentStatus`, `StrategyHypothesis`
+  - [x] `LeakageAuditReport`, `WalkForwardSummary`, `PromotionRequest`
+  - [x] `SilentProductionEntryError` security exception
+- [x] Leakage and look-ahead bias auditor (`backend/app/research/leakage_auditor.py`):
+  - [x] Monotonic timestamp ordering verification
+  - [x] Temporal split boundary isolation ($\max(T_{train}) < \min(T_{test})$)
+  - [x] Causal signal timestamp validation ($T_{signal} \ge T_{trigger}$)
+- [x] Immutable experiment registry & promotion gate (`backend/app/research/experiment_registry.py`):
+  - [x] Immutable preservation of baseline `v1.0.0-baseline`
+  - [x] Seed research candidates `v1.1.0-volatility-filter` and `v1.2.0-dynamic-atr-exit`
+  - [x] Prevention of duplicate semantic versions
+  - [x] Ironclad prohibition of silent production entry (mandatory `OPERATOR-PHASE27-*` token)
+- [x] Strategy research engine (`backend/app/research/research_engine.py`):
+  - [x] Realistic Indian market statutory cost modeling (`IndianMarketCostModel`)
+  - [x] Realistic slippage simulation (2.0 bps / 1-2 ticks)
+  - [x] Walk-forward validation across 3+ rolling windows
+  - [x] Comparative research summary matrix generation
+- [x] Dedicated Phase 27 FastAPI REST API endpoints (`backend/app/api/v1/endpoints/research.py`):
+  - [x] `GET /api/v1/research/summary`
+  - [x] `GET /api/v1/research/experiments`
+  - [x] `GET /api/v1/research/experiments/{id}`
+  - [x] `GET /api/v1/research/leakage-audit`
+  - [x] `POST /api/v1/research/promote` (guarded with HTTP 403 Forbidden on silent entry)
+- [x] Router integration (`backend/app/api/v1/router.py`)
+- [x] Operational CLI runner & audit tool (`backend/scripts/research_runner.py`):
+  - [x] ASCII comparative matrix formatting
+  - [x] Structured JSON streaming (`--json`)
+  - [x] Standalone leakage verification (`--leakage-check`)
+- [x] Technical documentation (`docs/trading/strategy_research_optimization.md`)
+- [x] Architecture Decision Record (`ADR-031` recorded in `DECISIONS.md`)
+- [x] Full quality gates & test regression:
+  - [x] 16/16 dedicated Phase 27 tests passing (`backend/tests/test_strategy_research.py`)
+  - [x] 294/294 full repository regression tests passing across 25 test modules
+  - [x] Static type checking passing with zero errors (`mypy backend/app` across 124 source files)
+  - [x] Static linting passing with zero errors (`ruff check backend/`)
+  - [x] Production frontend build passing (`tsc -b && vite build` in <2.0s)
   - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
-- [!] Phase 26 Gate Checkpoint: Live Trading Stabilization Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 26 complete. Execution halted before Phase 27 Strategy Research. Awaiting explicit user approval.)
+- [!] Phase 27 Gate Checkpoint: Strategy Research Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 27 complete. Execution halted before Phase 28 AI Learning & Evaluation. Awaiting explicit user approval.)
 
