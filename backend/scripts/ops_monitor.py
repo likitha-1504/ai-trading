@@ -59,7 +59,7 @@ def format_report(report_dict: dict) -> str:
         f"   Open Positions: {db['open_positions']} | Total Orders: {db['total_orders']}",
         "------------------------------------------------------------------",
         "4. LATENCY & ERROR MONITORING:",
-        f"   Watcher SLA:    Target <{lat['watcher_sla_target_ms']}ms | Realized Median: {lat['watcher_realized_median_us']} µs",
+        f"   Watcher SLA:    Target <{lat['watcher_sla_target_ms']}ms | Realized Median: {lat['watcher_realized_median_us']} us",
         f"   SLA Compliance: {lat['watcher_compliance_pct']}%",
         f"   Feature Calc:   {lat['feature_compute_avg_ms']} ms",
         f"   DB Commit:      {lat['db_commit_avg_ms']} ms",

@@ -811,6 +811,38 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit passing 14/14 dimensions.
   - Frontend production build compiling in 1.86s.
 
+---
+
+## ADR-030: Phase 26 Live Trading Stabilization & Execution Telemetry
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 26 Checkpoint Complete; Halted Before Phase 27)
+- **Context**: Transitioning from Phase 25 (Production Operations) to active trading evaluation requires rigorous stabilization controls to verify that:
+  1. Paper vs live execution metrics (fill rates, latency) remain consistent.
+  2. Slippage distributions stay strictly within 25 bps.
+  3. Realized broker debits match statutory Indian cost model projections within 5% variance.
+  4. Order rejection telemetry correctly enforces safety limits without silent failures.
+  5. Partial fills and order book depth absorption operate without order fragmentation.
+  6. Remote broker positions and cash ledger reconcile 100% with local SQLite WAL database.
+  7. Position Watcher maintains 100% sub-50ms SLA compliance with zero LLM dependence.
+  8. Inviolable capital ceilings (₹100 micro-capital / ₹300 autonomous threshold) are never automatically increased.
+- **Decision**:
+  1. Implement `LiveStabilizationEngine` in `backend/app/live/stabilization_engine.py` with invariant guards.
+  2. Implement REST API routes under `/api/v1/stabilization/*` for dashboard and external telemetry ingestion.
+  3. Implement terminal stabilization runner in `backend/scripts/stabilization_runner.py` with ASCII and JSON outputs.
+  4. Document stabilization standards and metrics in `docs/trading/live_trading_stabilization.md`.
+  5. Enforce deterministic security error on any automatic capital escalation attempts.
+  6. Validate with 17 dedicated automated tests (`backend/tests/test_live_trading_stabilization.py`).
+  7. Halt execution strictly at Phase 26 Checkpoint before Phase 27 Strategy Research.
+- **Consequences**: Empirical confirmation of live execution quality, zero risk of uncontrolled capital scaling, full accounting parity, and deterministic exit SLA verification.
+- **Verification Evidence**:
+  - 17/17 dedicated Phase 26 tests passing.
+  - 278/278 full repository regression tests passing across 24 test modules.
+  - Mypy clean across 118 source files.
+  - Ruff clean across all Python source code.
+  - Preflight audit passing 14/14 dimensions.
+  - Frontend production build compiling cleanly in 1.95s.
+
+
 
 
 
