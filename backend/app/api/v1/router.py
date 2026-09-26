@@ -31,6 +31,7 @@ from app.api.v1.endpoints import (
     disaster_recovery,
     security,
     sandbox,
+    council_evolution,
 )
 
 api_router = APIRouter()
@@ -48,6 +49,7 @@ api_router.include_router(execution_opt.router, tags=["execution-opt"])
 api_router.include_router(disaster_recovery.router, tags=["disaster-recovery"])
 api_router.include_router(security.router, tags=["security"])
 api_router.include_router(sandbox.router, tags=["sandbox"])
+api_router.include_router(council_evolution.router, tags=["council-evolution"])
 api_router.include_router(live_experiment.router, prefix="/live/experiment", tags=["live-experiment"])
 api_router.include_router(autonomous.router, prefix="/autonomous", tags=["autonomous"])
 

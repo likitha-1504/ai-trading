@@ -1017,7 +1017,56 @@ Status Key:
   - [x] Static linting passing with zero errors (`ruff check backend/`)
   - [x] Production frontend build passing (`tsc -b && vite build` in 1.89s)
   - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
-- [!] Phase 35 Gate Checkpoint: Research Sandbox & Governed Promotion Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 35 complete. Execution halted before Phase 36 AI Council Evolution. Awaiting explicit user approval.)
+- [x] Phase 35 Gate Checkpoint: Research Sandbox & Governed Promotion Sign-Off (Approved via explicit user instruction)
+
+## Phase 36: AI Council Evolution & Deterministic Safety Decoupling (Completed)
+- [x] AI Council Evolution Models & Enums (`backend/app/council_evolution/models.py`):
+  - [x] Council roles (`PRIMARY_ANALYST`, `ADVERSARIAL_CHALLENGER`, `MACRO_SENTIMENT_SPECIALIST`, `MICROSTRUCTURE_ANALYST`, `CANDIDATE_MODEL`)
+  - [x] Admission status (`PROPOSED`, `BENCHMARKING`, `JUSTIFIED`, `REJECTED`, `ADMITTED`)
+  - [x] Measurable hurdles schemas: uplift $\ge 3\%$, capital saved $\ge \text{INR } 20$, diversity $\ge 0.25$, latency $\le 2500$ ms, cost ratio $\le 1.50\times$
+  - [x] Candidate benchmark profiles and justification scorecards
+  - [x] Council independence attestation and master evolution report schemas
+  - [x] Domain exceptions: `UnjustifiedModelError`, `ModelDependencyViolationError`
+- [x] Measurable Justification & Model Admission Gate (`backend/app/council_evolution/admission_gate.py`):
+  - [x] Active council tracking: Qwen3 Primary Analyst, DeepSeek-R1 Challenger
+  - [x] Candidate evaluation: FinGPT Sentiment Specialist (justified) vs. Redundant Echo Bot (rejected)
+  - [x] Strict rejection of candidates breaching any of the 5 measurable hurdles (`UnjustifiedModelError`)
+  - [x] Governed model admission with signed operator token (`OPERATOR-COUNCIL-PHASE36-*`)
+  - [x] Cryptographic logging of council mutations in SQLite `security_audit_ledger`
+- [x] Deterministic Safety Decoupling & Independence Guard (`backend/app/council_evolution/independence_guard.py`):
+  - [x] Total AI blackout drill: verifies Trade Gate executes deterministic checks and rejects bad setups without AI
+  - [x] Position Watcher decoupling drill: monitors 100 ticks with sub-50ms SLA (realized < 50 µs) and triggers hard stop exits with zero AI dependency
+  - [x] AI consensus override immunity drill: verifies 100% unanimous AI BUY cannot override capital or risk limits
+  - [x] Cryptographic SHA-256 attestation generation (`CouncilIndependenceAttestation`)
+- [x] Council Evolution Master Orchestrator (`backend/app/council_evolution/evolution_orchestrator.py` & `__init__.py`):
+  - [x] Orchestrates candidate evaluations, admission gates, and independence audits
+  - [x] Produces comprehensive `CouncilEvolutionReport`
+- [x] FastAPI REST Endpoints (`backend/app/api/v1/endpoints/council_evolution.py`):
+  - [x] `GET /api/v1/council-evolution/status`
+  - [x] `GET /api/v1/council-evolution/candidates`
+  - [x] `POST /api/v1/council-evolution/evaluate-candidate`
+  - [x] `POST /api/v1/council-evolution/admit-model`
+  - [x] `POST /api/v1/council-evolution/audit-independence`
+  - [x] `GET /api/v1/council-evolution/audit`
+- [x] Router integration (`backend/app/api/v1/router.py`)
+- [x] Operational CLI runner & governance tool (`backend/scripts/council_evolution_runner.py`):
+  - [x] Council composition status (`--status`)
+  - [x] Candidate scorecard review (`--candidates`)
+  - [x] Candidate benchmarking (`--benchmark`)
+  - [x] Safety decoupling drill (`--audit-independence`)
+  - [x] Governed model admission (`--admit`, `--token`)
+  - [x] Master audit reporting (`--audit`)
+  - [x] Structured JSON streaming (`--json`)
+- [x] Technical documentation (`docs/ai/council_evolution.md`)
+- [x] Architecture Decision Record (`ADR-040` recorded in `DECISIONS.md`)
+- [x] Full quality gates & test regression:
+  - [x] 12/12 dedicated Phase 36 tests passing (`backend/tests/test_council_evolution.py`)
+  - [x] 438/438 full repository regression tests passing across 34 test modules
+  - [x] Static type checking passing with zero errors (`mypy backend/app` across 192 source files)
+  - [x] Static linting passing with zero errors (`ruff check backend/`)
+  - [x] Production frontend build passing (`tsc -b && vite build` in 1.91s)
+  - [x] Preflight operational hardening audit passing 14/14 dimensions with 0 warnings and 0 failures
+- [!] Phase 36 Gate Checkpoint: AI Council Evolution & Safety Decoupling Sign-Off (MANDATORY GATE CHECKPOINT REACHED - Phase 36 complete. Execution halted before Phase 37 Long-Term Autonomous System. Awaiting explicit user approval.)
 
 
 

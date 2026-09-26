@@ -1060,3 +1060,26 @@ This document tracks all critical architectural, design, and technical decisions
   - Preflight audit passing 14/14 dimensions.
   - Frontend production build clean.
 
+---
+
+## ADR-040: Phase 36 AI Council Evolution, Measurable Justification Gate, and Deterministic Safety Decoupling
+- **Date**: 2026-09-26
+- **Status**: ACCEPTED (Phase 36 Checkpoint Complete; Halted Before Phase 37)
+- **Context**: Autonomous multi-model reasoning adds qualitative depth to trading decisions, but unchecked model expansion creates latency inflation, token economic waste, and redundant echo chambers. Furthermore, deterministic risk management must never be compromised by AI availability or model downtime.
+- **Decision**:
+  1. **Measurable Justification Gate (`ModelAdmissionGate`)**: Models may be admitted to the deliberation council strictly upon passing 5 empirical hurdles: accuracy uplift $\ge +3.0\%$, downside capital saved $\ge \text{INR } 20.00$, reasoning diversity index $\ge 0.25$, P95 latency $\le 2500$ ms, and token cost ratio $\le 1.50\times$.
+  2. **Unjustified Model Exclusion (`UnjustifiedModelError`)**: Redundant, echoing, or inefficient models lacking measurable justification are rejected automatically.
+  3. **Deterministic Safety Decoupling (`CouncilIndependenceGuard`)**: The Deterministic Trade Gate and Position Watcher possess zero dependency on AI model availability. Total AI blackouts, API timeouts, or service crashes cannot halt or compromise safety controls.
+  4. **Sub-50ms Watcher SLA**: Position Watcher executes in a dedicated tick evaluation loop (realized latency < 50 µs), triggering stop losses and profit exits independently of AI inferences.
+  5. **AI Consensus Override Immunity**: Even 100% unanimous AI "STRONG BUY" conviction is blocked unconditionally if hard risk limits, capital bounds (₹100/₹300), or spread/timing rules are breached.
+  6. **Cryptographic Attestation & Audit Trail**: Issues `CouncilIndependenceAttestation` with SHA-256 fingerprint and logs council membership mutations to `security_audit_ledger`.
+  7. **Halt Execution**: Stop strictly at Phase 36 Checkpoint before Phase 37 Long-Term Autonomous System.
+- **Consequences**: Guarantees lean, high-signal council composition with proven value add, while mathematically isolating trade safety and stop-loss execution from LLM availability or hallucinations.
+- **Verification Evidence**:
+  - Dedicated Phase 36 tests passing in `backend/tests/test_council_evolution.py`.
+  - Full repository regression tests passing across all test modules.
+  - Mypy clean across backend source files.
+  - Ruff clean across all Python source code.
+  - Preflight audit passing 14/14 dimensions.
+  - Frontend production build clean.
+
