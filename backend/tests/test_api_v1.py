@@ -535,6 +535,32 @@ def test_safe_read_system_health(client):
     assert r_st.json()["status"] == "OPERATIONAL"
 
 
+def test_runtime_env(client):
+    """Verify safe, read-only runtime diagnostics endpoint returns expected keys."""
+    r = client.get("/api/v1/system/runtime-env")
+    assert r.status_code == 200
+    data = r.json()
+
+    expected_keys = {
+        "project_name",
+        "version",
+        "python_version",
+        "platform",
+        "is_paper_trading",
+        "database_path",
+        "database_journal_mode",
+    }
+    assert expected_keys.issubset(data.keys())
+
+    assert data["project_name"] == "AI Micro-Trading Agent"
+    assert isinstance(data["version"], str) and len(data["version"]) > 0
+    assert isinstance(data["python_version"], str) and len(data["python_version"]) > 0
+    assert isinstance(data["platform"], str) and len(data["platform"]) > 0
+    assert data["is_paper_trading"] is True
+    assert isinstance(data["database_path"], str) and len(data["database_path"]) > 0
+    assert data["database_journal_mode"].lower() in ("wal", "memory", "unknown")
+
+
 def test_safe_read_logs_and_audit_trail(client):
     """Verify 13. system event logs and complete decision audit trail."""
     r_logs = client.get("/api/v1/logs/system")

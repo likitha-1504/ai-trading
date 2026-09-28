@@ -165,6 +165,18 @@ class SystemHealthResponse(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class RuntimeEnvResponse(BaseModel):
+    """Safe, read-only backend runtime and environment diagnostic snapshot."""
+
+    project_name: str
+    version: str
+    python_version: str
+    platform: str
+    is_paper_trading: bool
+    database_path: str
+    database_journal_mode: str
+
+
 class AuditTrailResponse(BaseModel):
     """Reconstructed decision provenance for compliance and verification."""
 

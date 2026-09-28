@@ -1,7 +1,7 @@
 # Phase 20: Controlled ₹100 Live Experiment Evaluation Report
 
 **Experiment ID**: `EXP-PHASE20-LIVE-100`  
-**Execution Window**: 2026-09-26 06:48:59 UTC to 2026-09-26 06:48:59 UTC  
+**Execution Window**: 2026-09-28 16:10:56 UTC to 2026-09-28 16:10:56 UTC  
 **Capital Limit**: ₹100.00 (Strict Initial Micro-Capital)  
 **Autonomous Threshold**: ₹300.00  
 **Strategy Version**: `v1.0.0-phase20`  
@@ -54,9 +54,9 @@
 | **Orders Submitted** | — | 5 | Normal |
 | **Orders Filled** | — | 4 | Normal |
 | **Order Fill Rate** | >= 95.0% | **80.0%** | **PASS** |
-| **Broker ACK Latency** | < 50.0 ms | **0.04 ms** | **PASS** |
-| **Average Fill Latency** | < 100.0 ms | **1.25 ms** | **PASS** |
-| **P95 Fill Latency** | < 250.0 ms | **1.69 ms** | **PASS** |
+| **Broker ACK Latency** | < 50.0 ms | **0.05 ms** | **PASS** |
+| **Average Fill Latency** | < 100.0 ms | **1.26 ms** | **PASS** |
+| **P95 Fill Latency** | < 250.0 ms | **1.70 ms** | **PASS** |
 | **Partial Fills Count** | 0 (Market liquidity adequate) | 0 | Clean |
 
 ### 2.3 Dimension 3: Slippage Distribution
@@ -79,9 +79,9 @@
 | Watcher Requirement | Specification | Realized Value | Status |
 | :--- | :--- | :---: | :---: |
 | **Sub-50ms Evaluation SLA** | 100% of price checks < 50ms | **100.0%** | **PASS** |
-| **Median Evaluation Latency** | Sub-100 µs fast-path target | **17.10 µs** | **PASS** |
-| **P95 Evaluation Latency** | Sub-500 µs target | **25.65 µs** | **PASS** |
-| **Maximum Latency** | Sub-5ms worst-case | **37.62 µs** | **PASS** |
+| **Median Evaluation Latency** | Sub-100 µs fast-path target | **22.50 µs** | **PASS** |
+| **P95 Evaluation Latency** | Sub-500 µs target | **33.75 µs** | **PASS** |
+| **Maximum Latency** | Sub-5ms worst-case | **49.50 µs** | **PASS** |
 | **Total Price Evaluations** | Continuous real-time | 100 checks | Nominal |
 | **Exits Triggered** | Hard stop, profit target, cutoff | 4 exits | Verified |
 | **Trigger Breakdown** | `{"TAKE_PROFIT": 2, "HARD_STOP": 1, "TIME_EXPIRY": 1}` | Exact trigger tracking | Complete |
@@ -126,7 +126,7 @@
 
 | Version | Timestamp | Mutation Reason | Status |
 | :--- | :---: | :--- | :---: |
-| `v1.0.0-phase20` | 2026-09-26 06:48:59 | Phase 20 initial live baseline configuration | **LOCKED** |
+| `v1.0.0-phase20` | 2026-09-28 16:10:56 | Phase 20 initial live baseline configuration | **LOCKED** |
 
 ---
 

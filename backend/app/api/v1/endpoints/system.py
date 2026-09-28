@@ -1,6 +1,8 @@
 """System health, status, emergency kill-switch, and operational mode endpoints."""
 
+import platform
 import sqlite3
+import sys
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -17,6 +19,7 @@ from app.api.schemas import (
     KillSwitchResponse,
     ModeSwitchRequest,
     ModeSwitchResponse,
+    RuntimeEnvResponse,
     SystemHealthResponse,
 )
 from app.core.config import settings
@@ -83,6 +86,37 @@ def get_system_status(
         "version": settings.VERSION,
         "live_trading_allowed": str(sys_state.live_trading_allowed),
     }
+
+
+@router.get(
+    "/runtime-env",
+    response_model=RuntimeEnvResponse,
+    summary="Get safe read-only backend runtime diagnostics",
+    description="Reports project name, version, Python runtime, OS platform, paper-trading flag, "
+    "database path, and current SQLite journal mode. No mutation, no broker access.",
+)
+def get_runtime_env(
+    repo: DatabaseRepository = Depends(get_db_repo),
+) -> RuntimeEnvResponse:
+    db_path = repo.db_path or settings.DATABASE_PATH
+    journal_mode = "UNKNOWN"
+    try:
+        with get_connection(db_path) as conn:
+            row = conn.execute("PRAGMA journal_mode;").fetchone()
+            if row is not None:
+                journal_mode = str(row[0]).lower()
+    except (sqlite3.Error, OSError, RuntimeError, ValueError):
+        journal_mode = "UNKNOWN"
+
+    return RuntimeEnvResponse(
+        project_name=settings.PROJECT_NAME,
+        version=settings.VERSION,
+        python_version=platform.python_version(),
+        platform=sys.platform,
+        is_paper_trading=settings.IS_PAPER_TRADING,
+        database_path=db_path,
+        database_journal_mode=journal_mode,
+    )
 
 
 @router.post(
