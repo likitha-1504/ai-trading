@@ -60,3 +60,10 @@ secrets/
 backups/
 backups
 *.log
+
+# Worktrees & Scratch
+worktrees/
+scratch/
+.kilo/
+WhatsApp*
+
