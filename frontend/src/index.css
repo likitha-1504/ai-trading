@@ -4,28 +4,171 @@
 
 :root {
   color-scheme: dark;
-  --bg-root: #0B0E14;
-  --bg-surface: #151A23;
-  --bg-surface-elevated: #1C2331;
-  --border-subtle: #222938;
-  --border-highlight: #334155;
-  --text-primary: #F1F5F9;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --color-bullish: #10B981;
-  --color-bearish: #EF4444;
-  --color-fact-badge: #0284C7;
-  --color-fact-border: #0369A1;
-  --color-ai-badge: #8B5CF6;
-  --color-ai-border: #6D28D9;
+  --bg-void: #050814;
+  --bg-deep: #070c1a;
+  --bg-panel: #0b1124;
+  --bg-navy: #0b132b;
+  --neon-cyan: #00f0ff;
+  --neon-blue: #38bdf8;
+  --neon-emerald: #00e676;
+  --neon-crimson: #f43f5e;
+  --ai-purple: #8b5cf6;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.28) transparent;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
 }
 
 body {
   margin: 0;
-  background-color: #0B0E14;
-  color: #F1F5F9;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: var(--text-primary);
+  font-family: "Space Grotesk", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--bg-void);
   overflow-x: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+   Cosmic deep-space backdrop: star dust, nebula wash, Earth-curvature horizon
+   glow with atmosphere rim light, plus the cockpit silhouette plate.
+   Purely decorative and pointer-events-none so it never blocks the cockpit UI.
+--------------------------------------------------------------------------- */
+.cosmic-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(1100px 620px at 78% -8%, rgba(139, 92, 246, 0.22), transparent 62%),
+    radial-gradient(900px 520px at 8% 6%, rgba(0, 240, 255, 0.16), transparent 60%),
+    radial-gradient(760px 480px at 50% 100%, rgba(56, 189, 248, 0.14), transparent 65%),
+    linear-gradient(180deg, #050814 0%, #070c1a 45%, #0b132b 100%);
+}
+
+/* Star dust field (three parallax layers) */
+.cosmic-backdrop::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  background-image:
+    radial-gradient(1.4px 1.4px at 12% 18%, rgba(255, 255, 255, 0.9), transparent 60%),
+    radial-gradient(1.1px 1.1px at 78% 12%, rgba(190, 242, 255, 0.85), transparent 60%),
+    radial-gradient(1.6px 1.6px at 33% 62%, rgba(255, 255, 255, 0.75), transparent 60%),
+    radial-gradient(1px 1px at 62% 38%, rgba(167, 139, 250, 0.8), transparent 60%),
+    radial-gradient(1.3px 1.3px at 88% 72%, rgba(255, 255, 255, 0.7), transparent 60%),
+    radial-gradient(1px 1px at 22% 84%, rgba(125, 211, 252, 0.8), transparent 60%),
+    radial-gradient(1.2px 1.2px at 47% 26%, rgba(255, 255, 255, 0.6), transparent 60%),
+    radial-gradient(1px 1px at 68% 88%, rgba(196, 181, 253, 0.7), transparent 60%),
+    radial-gradient(1.1px 1.1px at 8% 46%, rgba(255, 255, 255, 0.55), transparent 60%),
+    radial-gradient(1.4px 1.4px at 92% 32%, rgba(224, 231, 255, 0.7), transparent 60%);
+  background-size: 340px 340px, 420px 420px, 300px 300px, 380px 380px, 460px 460px;
+  background-repeat: repeat;
+  animation: twinkle 4.5s ease-in-out infinite;
+  opacity: 0.85;
+}
+
+/* Earth curvature horizon glow + atmosphere rim light */
+.cosmic-backdrop::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -46vh;
+  width: 150vw;
+  height: 78vh;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 0 0 / 22% 22% 0 0;
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(0, 240, 255, 0.34) 0%, rgba(56, 189, 248, 0.16) 26%, rgba(11, 19, 43, 0.9) 58%, transparent 74%),
+    linear-gradient(180deg, transparent 40%, rgba(8, 15, 38, 0.92) 72%);
+  box-shadow:
+    0 -2px 60px rgba(0, 240, 255, 0.28),
+    0 -18px 90px rgba(56, 189, 248, 0.22);
+  filter: blur(0.4px);
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* Cockpit silhouette plate with mission quote */
+.cockpit-plate {
+  position: fixed;
+  left: 1.25rem;
+  bottom: 0.75rem;
+  z-index: 1;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  opacity: 0.85;
+}
+
+.cockpit-plate__silhouette {
+  width: 132px;
+  height: 92px;
+  flex: none;
+  filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.35));
+}
+
+.cockpit-plate__quote {
+  font-family: "Orbitron", "Space Grotesk", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: rgba(224, 242, 254, 0.82);
+  text-shadow: 0 0 14px rgba(0, 240, 255, 0.55);
+  line-height: 1.6;
+}
+
+@layer components {
+  /* Frosted cockpit glass panel */
+  .glass-panel {
+    background: rgba(11, 19, 43, 0.72);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      0 10px 30px -14px rgba(0, 0, 0, 0.9);
+  }
+
+  .glass-panel-soft {
+    background: rgba(11, 17, 36, 0.55);
+    border: 1px solid rgba(56, 189, 248, 0.14);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* Section label used across cockpit panels */
+  .cockpit-label {
+    font-family: "Orbitron", "Space Grotesk", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #7dd3fc;
+  }
+
+  .neon-text-cyan {
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.55);
+  }
 }
 
 /* Tabular numbers to prevent digit flutter during high-frequency price updates */
@@ -34,18 +177,61 @@ body {
   font-feature-settings: "tnum";
 }
 
+.price-flash-up {
+  animation: price-flash-up 0.6s ease-out;
+}
+
+.price-flash-down {
+  animation: price-flash-down 0.6s ease-out;
+}
+
+@keyframes price-flash-up {
+  from {
+    background-color: rgba(16, 185, 129, 0.22);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+@keyframes price-flash-down {
+  from {
+    background-color: rgba(239, 68, 68, 0.22);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
 /* Custom dark scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0B0E14;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #222938;
+  background: rgba(56, 189, 248, 0.25);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: rgba(56, 189, 248, 0.45);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cosmic-backdrop::before,
+  .orbit-ring,
+  .status-dot,
+  .pulse-dot {
+    animation: none !important;
+  }
 }
